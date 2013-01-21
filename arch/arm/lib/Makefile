@@ -47,6 +47,7 @@ SOBJS-$(CONFIG_USE_ARCH_MEMCPY) += memcpy.o
 else
 COBJS-$(CONFIG_SPL_FRAMEWORK) += spl.o
 endif
+COBJS-$(CONFIG_SYS_ARCH_TIMER) += arch_timer.o
 
 COBJS-y	+= interrupts.o
 COBJS-y	+= reset.o
