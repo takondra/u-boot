@@ -128,6 +128,13 @@ reset:
 	/*
 	 * set the cpu to SVC32 mode
 	 */
+#if defined(SIM_BREAKPOINT_WA)
+	/* workaround to disable secure state */
+	mrc  	p15, #0, r0, c1, c1, #0
+	orr	r0, r0, #1
+	mcr  	p15, #0, r0, c1, c1, #0
+	isb
+#endif
 	mrs	r0, cpsr
 	bic	r0, r0, #0x1f
 	orr	r0, r0, #0xd3
