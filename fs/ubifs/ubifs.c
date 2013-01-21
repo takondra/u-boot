@@ -677,7 +677,7 @@ error:
 	return err;
 }
 
-int ubifs_load(char *filename, u32 addr, u32 size)
+int ubifs_load(char *filename, u32 addr, u32 *size)
 {
 	struct ubifs_info *c = ubifs_sb->s_fs_info;
 	unsigned long inum;
@@ -712,12 +712,12 @@ int ubifs_load(char *filename, u32 addr, u32 size)
 	 * If no size was specified or if size bigger than filesize
 	 * set size to filesize
 	 */
-	if ((size == 0) || (size > inode->i_size))
-		size = inode->i_size;
+	if ((*size == 0) || (*size > inode->i_size))
+		*size = inode->i_size;
 
-	count = (size + UBIFS_BLOCK_SIZE - 1) >> UBIFS_BLOCK_SHIFT;
+	count = (*size + UBIFS_BLOCK_SIZE - 1) >> UBIFS_BLOCK_SHIFT;
 	printf("Loading file '%s' to addr 0x%08x with size %d (0x%08x)...\n",
-	       filename, addr, size, size);
+	       filename, addr, *size, *size);
 
 	page.addr = (void *)addr;
 	page.index = 0;
@@ -726,8 +726,8 @@ int ubifs_load(char *filename, u32 addr, u32 size)
 		/*
 		 * Make sure to not read beyond the requested size
 		 */
-		if (((i + 1) == count) && (size < inode->i_size))
-			last_block_size = size - (i * PAGE_SIZE);
+		if (((i + 1) == count) && (*size < inode->i_size))
+			last_block_size = *size - (i * PAGE_SIZE);
 
 		err = do_readpage(c, inode, &page, last_block_size);
 		if (err)
