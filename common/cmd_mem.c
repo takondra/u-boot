@@ -592,6 +592,57 @@ int do_mem_loopw (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 }
 #endif /* CONFIG_LOOPW */
 
+int do_mem_smtest (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	unsigned long addr, val, val1, start, end;
+	int flip = 0, iter = 1;
+
+	if (argc > 1)
+		start = simple_strtoul(argv[1], NULL, 16);
+	else
+		start = 0x80000000;
+
+	if (argc > 2)
+		end = simple_strtoul(argv[2], NULL, 16);
+	else
+		end = start + 0x100000;
+
+	for (addr = start; addr < end; addr += sizeof(unsigned long))
+		*((volatile unsigned long *)addr) = addr;
+
+	addr = start;
+	while (1) {
+		val = *((volatile unsigned long *)addr);
+		val = flip ? ~val : val;
+
+		if (addr != val) {
+			printf("[%d] read mismatch at %08lx, found %08lx (delta %08lx)\n",
+			       iter, addr, val, addr ^ val);
+		}
+
+		val = flip ? addr : ~addr;
+		*((volatile unsigned long *)addr) = val;
+		val1 = *((volatile unsigned long *)addr);
+		if (val1 != val) {
+			printf("[%d] write mismatch at %08lx, wrote %08lx, read %08lx\n",
+			       iter, addr, val, val1);
+		}
+
+		addr += sizeof(unsigned long);
+
+		if (addr >= end) {
+			++iter;
+			if ((iter % 100) == 0)
+				printf("completed %d iterations\n", iter);
+			addr = start;
+			flip = !flip;
+		}
+
+		if (ctrlc())
+			return 1;
+	}
+}
+
 /*
  * Perform a memory test. A more complete alternative test can be
  * configured using CONFIG_SYS_ALT_MEMTEST. The complete test loops until
@@ -1247,6 +1298,12 @@ U_BOOT_CMD(
 	mtest,	5,	1,	do_mem_mtest,
 	"simple RAM read/write test",
 	"[start [end [pattern [iterations]]]]"
+);
+
+U_BOOT_CMD(
+	smtest,	3,	0,	do_mem_smtest,
+	"simple RAM read/write test",
+	"start end"
 );
 
 #ifdef CONFIG_MX_CYCLIC
