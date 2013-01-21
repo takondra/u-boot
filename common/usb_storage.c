@@ -700,7 +700,7 @@ static int usb_stor_BBB_transport(ccb *srb, struct us_data *us)
 		return USB_STOR_TRANSPORT_FAILED;
 	}
 	if (!(us->flags & USB_READY))
-		mdelay(5);
+		mdelay(100);
 	pipein = usb_rcvbulkpipe(us->pusb_dev, us->ep_in);
 	pipeout = usb_sndbulkpipe(us->pusb_dev, us->ep_out);
 	/* DATA phase + error handling */
