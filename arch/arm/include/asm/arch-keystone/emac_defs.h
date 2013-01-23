@@ -21,17 +21,14 @@
 #define _EMAC_DEFS_H_
 
 #include <asm/arch/hardware.h>
+#include <asm/io.h>
 
 typedef enum { FALSE = 0, TRUE = 1 } bool;
 
 #define DEVICE_REG32_R(a)			readl(a)
 #define DEVICE_REG32_W(a,v)			writel(v,a)
 
-#define BOOTBITMASK(x,y)      (   (   (  ((u_int32_t)1 << (((u_int32_t)x)-((u_int32_t)y)+(u_int32_t)1) ) - (u_int32_t)1 )   )   <<  ((u_int32_t)y)   )
-#define BOOT_READ_BITFIELD(z,x,y)   (((u_int32_t)z) & BOOTBITMASK(x,y)) >> (y)
-#define BOOT_SET_BITFIELD(z,f,x,y)  (((u_int32_t)z) & ~BOOTBITMASK(x,y)) | ( (((u_int32_t)f) << (y)) & BOOTBITMASK(x,y) )
-
-#define chipLmbd(x,y) _lmbd(x,y)
+/*#define chipLmbd(x,y) _lmbd(x,y) */
 
 #define EMAC_EMACSL_BASE_ADDR			(TCI66XX_PASS_BASE + 0x00090900)
 #define EMAC_MDIO_BASE_ADDR			(TCI66XX_PASS_BASE + 0x00090300)
@@ -84,11 +81,6 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
 #define EMAC_MACCONTROL_RMIISPEED_100		(1 << 15)
 
 #define EMAC_MIN_ETHERNET_PKT_SIZE	60
-
-/**
- * @brief The size in bytes of the internal stream buffer
- */
-#define MAX_SIZE_STREAM_BUFFER  1520
 
 struct mac_sl_cfg {
 	u_int32_t max_rx_len;	/* Maximum receive packet length. */
@@ -144,120 +136,9 @@ struct mac_sl_cfg {
 #define CPGMAC_REG_RESET_VAL_RESET           (1 << 0)
 
 
-/* Emulation control register */
-#define CPDMA_REG_EMU_CTL   0x08
-
-/* CPPI Tx DMA channel control registers */
-#define CPDMA_REG_TCHAN_CFG_REG_A(x)   (0x00 + (x)*0x20)
-#define CPDMA_REG_TCHAN_CFG_REG_B(x)   (0x04 + (x)*0x20)
-
-
-/* CPPI Rx DMA channel control register */
-#define CPDMA_REG_RCHAN_CFG_REG_A(x)    (0x00 + (x)*0x20)
-
-/* CPPI Tx DMA Scheduler Configuration register */
-#define CPDMA_REG_TCHAN_SCHED_CFG(x)    ((x)*0x04)
-
-/* CPPI Rx DMA flow configuration registers */
-#define CPDMA_RX_FLOW_CFG(reg,idx)      ( ((reg)*4) + ((idx)*0x20) )
-#define CPDMA_RX_FLOW_REG_A     0
-#define CPDMA_RX_FLOW_REG_B     1
-#define CPDMA_RX_FLOW_REG_C     2
-#define CPDMA_RX_FLOW_REG_D     3
-#define CPDMA_RX_FLOW_REG_E     4
-#define CPDMA_RX_FLOW_REG_F     5
-#define CPDMA_RX_FLOW_REG_G     6
-#define CPDMA_RX_FLOW_REG_H     7
-
-/* Descriptor type created by flows */
-#define CPDMA_DESC_TYPE_HOST    1
-
-
-/* CPPI Tx DMA channel control register A definitions */
-#define CPDMA_REG_VAL_TCHAN_A_TX_ENABLE ((u_int32_t)1 << 31)
-#define CPDMA_REG_VAL_TCHAN_A_TX_TDOWN  (1 << 30)
-
-/* CPPI Tx DMA channel control register B definitions */
-#define CPDMA_REG_VAL_TCHAN_B_TX_FILT_EINFO   (1 << 30)
-#define CPDMA_REG_VAL_TCHAN_B_TX_FILT_PSWORDS (1 << 29)
-#define CPDMA_REG_TCHAN_B_SET_DEFAULT_TDOWN_QMGR(x,v)  (x) = (BOOT_SET_BITFIELD((x), (v), 13, 12)
-#define CPDMA_REG_TCHAN_B_SET_DEFAULT_TDOWN_QNUM(x,v)  (x) = (BOOT_SET_BITFIELD((x), (v), 11,  0)
-
-
-/* CPPI Rx DMA channel control register A definitions */
-#define CPDMA_REG_VAL_RCHAN_A_RX_ENABLE ((u_int32_t)1 << 31)
-#define CPDMA_REG_VAL_RCHAN_A_RX_TDOWN  (1 << 30)
-
-/* CPPI Tx DMA Scheduler Confuration value. This sets the priorities of
- * the channels. If set to all equal, the actual value doesn't matter */
-#define CPDMA_REG_VAL_TCHAN_SCHED_HIGH_PRIORITY         0
-#define CPDMA_REG_VAL_TCHAN_SCHED_MED_HIGH_PRIORITY     1
-#define CPDMA_REG_VAL_TCHAN_SCHED_MED_LOW_PRIORITY      2
-#define CPDMA_REG_VAL_TCHAN_SCHED_LOW_PRIORITY          3
-
-
-/* A very simply flow configuration is supported. No queue allocation by bins is supported */
-
-/* CPPI Rx flow configuration register A */
-#define CPDMA_REG_VAL_MAKE_RX_FLOW_A(einfo,psinfo,rxerr,desc,psloc,sopOff,qmgr,qnum)  \
-        (   ((einfo & 1) << 30)       |   \
-            ((psinfo & 1) << 29)      |   \
-            ((rxerr & 1) << 28)       |   \
-            ((desc & 3) << 26)        |   \
-            ((psloc & 1) << 25)       |   \
-            ((sopOff & 0x1ff) << 16)  |   \
-            ((qmgr & 3) << 12)        |   \
-            ((qnum & 0xfff) << 0)     )
-
-/* CPPI Rx flow configuration register B. No tags are used */
-#define CPDMA_REG_VAL_RX_FLOW_B_DEFAULT     0
-
-
-/* CPPI Rx flow configuration register C. No tag replacement and no size thresholds */
-#define CPDMA_REG_VAL_RX_FLOW_C_DEFAULT     0
-
-/* CPPI Rx flow configuration register D */
-#define CPDMA_REG_VAL_MAKE_RX_FLOW_D(fd0Qm, fd0Qnum, fd1Qm, fd1Qnum)   \
-        (   ((fd0Qm & 3) << 28)         |   \
-            ((fd0Qnum & 0xfff) << 16)   |   \
-            ((fd1Qm & 3) << 12)         |   \
-            ((fd1Qnum & 0xfff) <<  0)   )
-
-/* CPPI Rx flow configuration register E */
-#define CPDMA_REG_VAL_RX_FLOW_E_DEFAULT     0
-
-/* CPPI Rx flow configuration register F */
-#define CPDMA_REG_VAL_RX_FLOW_F_DEFAULT     0
-
-/* CPPI Rx flow configuration register G */
-#define CPDMA_REG_VAL_RX_FLOW_G_DEFAULT     0
-
-/* CPPI Rx flow configuration register H */
-#define CPDMA_REG_VAL_RX_FLOW_H_DEFAULT     0
-
-/* Default Emulation control register value disables loopback */
-#define CPDMA_REG_VAL_EMU_CTL_NO_LOOPBACK   0
 
 /* Maxlen register values */
 #define CPGMAC_REG_MAXLEN_LEN                0x3fff
-
-struct packet_dma_rx_cfg {
-	u_int32_t  rx_base;		/* Base address of rx registers */
-	u_int32_t  n_rx_chans;		/* The number of rx channels */
-	u_int32_t  flow_base;		/* Add address of flow registers */
-	u_int32_t  n_rx_flows;		/* Number of rx flows */
-	u_int32_t  qm_num_free_buf;	/* Queue manager for descriptors/buffers for received packets */
-	u_int32_t  queue_free_buf;	/* Queue that holds descriptors/buffers for received packets */
-	u_int32_t  qm_num_rx;		/* Queue manager for received packets */
-	u_int32_t  queue_rx;		/* Default Rx queue for received packets */
-	u_int32_t  tdown_poll_count;	/* Number of loop iterations to wait for teardown */
-};
-
-struct packet_dma_tx_cfg {
-	u_int32_t gbl_ctl_base;	/* Base address of global control registers */
-	u_int32_t tx_base;	/* Base address of the tx registers */
-	u_int32_t n_tx_chans;	/* The number of tx channels */
-};
 
 /**
  *  @brief
@@ -290,45 +171,6 @@ struct packet_dma_tx_cfg {
 #define CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE   ((u_int32_t)0xc0000000)
 #define CPSW_REG_VAL_PORTCTL_FORWARD_MODE        0x3
 
-#ifdef CONFIG_SOC_TCI6614
-#define DEVICE_QM_MANAGER_BASE          0x02a68000
-#define DEVICE_QM_DESC_SETUP_BASE       0x02a6a000
-#define DEVICE_QM_MANAGER_QUEUES_BASE   0x02a20000
-#define DEVICE_QM_MANAGER_Q_PROXY_BASE  0x02a40000
-#define DEVICE_QM_QUEUE_STATUS_BASE	0x02a00000
-#define DEVICE_QM_NUM_LINKRAMS          2
-#define DEVICE_QM_NUM_MEMREGIONS        20
-
-#define DEVICE_PA_CDMA_GLOBAL_CFG_BASE   0x02004000
-#define DEVICE_PA_CDMA_TX_CHAN_CFG_BASE  0x02004400
-#define DEVICE_PA_CDMA_RX_CHAN_CFG_BASE  0x02004800
-#define DEVICE_PA_CDMA_RX_FLOW_CFG_BASE  0x02005000
-
-#define DEVICE_PA_CDMA_RX_NUM_CHANNELS   24
-#define DEVICE_PA_CDMA_RX_NUM_FLOWS      32
-#define DEVICE_PA_CDMA_TX_NUM_CHANNELS   9
-#endif
-
-#ifdef CONFIG_SOC_TCI6638
-#define DEVICE_QM_MANAGER_BASE          0x02a02000
-#define DEVICE_QM_DESC_SETUP_BASE       0x02a03000
-#define DEVICE_QM_MANAGER_QUEUES_BASE   0x02a80000
-#define DEVICE_QM_MANAGER_Q_PROXY_BASE  0x02ac0000
-#define DEVICE_QM_QUEUE_STATUS_BASE	0x02a40000
-#define DEVICE_QM_NUM_LINKRAMS          2
-#define DEVICE_QM_NUM_MEMREGIONS        20
-
-#define DEVICE_PA_CDMA_GLOBAL_CFG_BASE   0x02004000
-#define DEVICE_PA_CDMA_TX_CHAN_CFG_BASE  0x02004400
-#define DEVICE_PA_CDMA_RX_CHAN_CFG_BASE  0x02004800
-#define DEVICE_PA_CDMA_RX_FLOW_CFG_BASE  0x02005000
-
-#define DEVICE_PA_CDMA_RX_NUM_CHANNELS   24
-#define DEVICE_PA_CDMA_RX_NUM_FLOWS      32
-#define DEVICE_PA_CDMA_TX_NUM_CHANNELS   9
-#endif
-
-
 #define PA_MAGIC_ID  0x0CEC11E0
 
 #define PA_REG_MAILBOX_SLOT(pdsp, slot)		(0x00 + ((pdsp)*0x10) + ((slot)*0x04))
@@ -351,114 +193,6 @@ struct pa_config {
 	u_int32_t  rx_qnum;     /* Receive packet queue number */
 	u_int8_t   *cmd_buf;    /* Buffer used to create PA command */
 };
-
-#define DEVICE_QM_FREE_Q                910
-#define DEVICE_QM_LNK_BUF_Q             911
-#define DEVICE_QM_RCV_Q                 912
-#define DEVICE_QM_TX_Q                  913
-#define DEVICE_QM_PA_CFG_Q              640
-#define DEVICE_QM_ETH_TX_Q              648
-
-/* return values */
-#define QM_OK                                0
-#define QM_INVALID_LINKRAM_ALIGNMENT        -1
-#define QM_INVALID_MEMREGION_ALIGNMENT      -2
-#define QM_INVALID_LINKRAM_SIZE             -3
-#define QM_INVALID_LINKRAM_RAM_SIZE         -4      /* Not enough link ram for the number of descriptors */
-
-
-/* Memory alignment requirements (bytes) */
-#define QM_LINKRAM_ALIGN        4
-#define QM_MEMR_ALIGN           16      /* Not specified in the doc */
-
-/* The driver supports only a single descriptor size */
-#define QM_DESC_SIZE_BYTES      64
-
-/* QM setup configuration */
-struct qm_config {
-	u_int32_t link_ram_base;
-	u_int32_t link_ram_size;
-	u_int32_t mem_region_base;
-	u_int32_t mem_reg_num_descs;
-	u_int32_t dest_q;
-};
-
-struct qm_host_desc {
-	u_int32_t desc_info;
-	u_int32_t tag_info;
-	u_int32_t packet_info;
-	u_int32_t buff_len;
-	u_int32_t buff_ptr;
-	u_int32_t next_bdptr;
-	u_int32_t orig_buff_len;
-	u_int32_t orig_buff_ptr;
-	u_int32_t timestamp;
-	u_int32_t swinfo0;
-	u_int32_t swinfo1;
-	u_int32_t swinfo2;
-	u_int32_t ps_data;
-};
-
-/* Descriptor values */
-/* Descriptor Info: Descriptor type is host with any protocol specific info in the descriptor */
-#define QM_DESC_TYPE_HOST           0
-#define QM_DESC_PSINFO_IN_DESCR     0
-#define QM_DESC_DEFAULT_DESCINFO       (QM_DESC_TYPE_HOST << 30)    |  \
-                                       (QM_DESC_PSINFO_IN_DESCR << 22)
-#define QM_DESC_INFO_GET_PSINFO_LOC(x)  BOOT_READ_BITFIELD((x), 22, 22)
-
-#define QM_DESC_DESCINFO_SET_PKT_LEN(x,v)  (x) = BOOT_SET_BITFIELD((x), (v), 21, 0)
-#define QM_DESC_DESCINFO_GET_PKT_LEN(x)    BOOT_READ_BITFIELD((x), 21, 0)
-
-
-/* Packet Info */
-#define QM_DESC_PINFO_EPIB              1
-#define QM_DESC_PINFO_RETURN_OWN        1
-#define QM_DESC_DEFAULT_PINFO           (QM_DESC_PINFO_EPIB << 31)          |   \
-                                        (QM_DESC_PINFO_RETURN_OWN << 15)
-#define QM_PKT_INFO_GET_EPIB(x)         BOOT_READ_BITFIELD((x), 31, 31)
-#define QM_PKT_INFO_SET_PSINFO_SIZE(x,v)    (x) = BOOT_SET_BITFIELD((x), (v), 29, 24)
-
-
-
-#define QM_DESC_PINFO_SET_QM(x,v)       (x) = BOOT_SET_BITFIELD((x), (v), 13, 12)
-#define QM_DESC_PINFO_SET_QUEUE(x,v)    (x) = BOOT_SET_BITFIELD((x), (v), 11,  0)
-
-/* Memory map */
-/* Relative to the queue manager region */
-#define QM_REG_REVISION         0x00
-#define QM_REG_DIVERSION        0x08
-#define QM_REG_LINKRAM_BASE(x)  (0x0c + 8*(x))
-#define QM_REG_LINKRAM_SIZE(x)  (0x10 + 8*(x))
-
-/* The queue peek registers (includes thresholds) */
-#define QM_REG_STAT_CFG_REGD(x)  (0xc + 16*(x))
-
-/* Relative to the descriptor setup region */
-#define QM_REG_MEMR_BASE_ADDR(x)  (0x00 + 16*(x))
-#define QM_REG_MEMR_START_IDX(x)  (0x04 + 16*(x))
-#define QM_REG_MEMR_DESC_SETUP(x) (0x08 + 16*(x))
-
-/* Queues, register A */
-#define QM_REG_QUEUE_REGA(x)  (0x00 + 16*(x))
-#define QM_QA_ENTRY_COUNT_MSB  18
-#define QM_QA_ENTRY_COUNT_LSB   0
-
-/* Queues, register D */
-#define QM_REG_QUEUE_REGD(x)  (0x0c + 16*(x))
-
-/* Description region setup */
-#define QM_REG_VAL_DESC_SETUP_SET_DESC_SIZE(x,v)  (x) = BOOT_SET_BITFIELD((x),((v) >> 4)-1, 28, 16)
-
-
-/* Maximum linking RAM size mask */
-#define QM_REG_LINKRAM_SIZE_MAX_MASK  0x7ffff
-
-
-
-#define DEVICE_RX_CDMA_TIMEOUT_COUNT    1000
-
-
 
 #define DEVICE_PA_BASE                  TCI66XX_PASS_BASE
 #define DEVICE_PA_NUM_PDSPS             6
@@ -530,7 +264,15 @@ struct qm_host_desc {
 
 #define DEVICE_PSTREAM_CFG_REG_ADDR                 (TCI66XX_PASS_BASE + 0x604)
 #define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_PDSP0      0
-#define hwConfigStreamingSwitch()                   DEVICE_REG32_W(DEVICE_PSTREAM_CFG_REG_ADDR, DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_PDSP0);
+
+#ifdef CONFIG_SOC_TCI6614
+#define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_CPPI      0x00000606
+#endif
+#ifdef CONFIG_SOC_TCI6638
+#define DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_CPPI      0x06060606
+#endif
+
+#define hwConfigStreamingSwitch()                   DEVICE_REG32_W(DEVICE_PSTREAM_CFG_REG_ADDR, DEVICE_PSTREAM_CFG_REG_VAL_ROUTE_CPPI);
 
 #define SERDES_MAX_LANES    4
 

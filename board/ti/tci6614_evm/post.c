@@ -34,6 +34,7 @@
 #include <spi_flash.h>
 #include <asm/arch/nand_defs.h>
 #include <asm/arch/emac_defs.h>
+#include <asm/arch/cppi_dma.h>
 #include "post.h"
 
 /* The linking RAM */
@@ -512,8 +513,6 @@ post_test_emac_loopback
     /* Cpdma configuration. */
     packet_dma_rx_configure((struct packet_dma_rx_cfg *)targetGetCpdmaRxConfig());
     packet_dma_tx_configure((struct packet_dma_tx_cfg *)targetGetCpdmaTxConfig());
-
-    pa_configure(dev.enetaddr);
 
     /* Streaming switch configuration. If not present this statement is defined to void
      * in target.h.  If present this is usually defined to a series of register writes */

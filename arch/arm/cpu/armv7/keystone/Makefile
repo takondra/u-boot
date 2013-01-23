@@ -23,7 +23,7 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(SOC).o
 
-COBJS	+= aemif.o init.o psc.o clock.o cmd_clock.o
+COBJS	+= aemif.o init.o psc.o clock.o cmd_clock.o cppi_dma.o
 ifdef CONFIG_SOC_TCI6614
 COBJS	+= timer.o
 endif

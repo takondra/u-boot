@@ -194,7 +194,7 @@ extern int ddr_memory_test (u32 start_address, u32 end_address, int quick);
 extern void tci6614_eth_close(struct eth_device *dev);
 extern struct qm_host_desc *qm_pop (u_int32_t qnum);
 extern void qm_push (struct qm_host_desc *hd, u_int32_t qnum, u_int32_t descrSize);
-extern int16_t qm_setup (struct qm_config *cfg);
+extern int qm_setup (struct qm_config *cfg);
 extern void *targetGetQmConfig (void);
 extern void init_queues(void);
 extern int packet_dma_rx_configure(const struct packet_dma_rx_cfg *cfg);
