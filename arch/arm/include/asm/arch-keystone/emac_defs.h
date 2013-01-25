@@ -228,6 +228,7 @@ struct pa_config {
 #define SGMII_LINK_MAC_PHY		1
 #define SGMII_LINK_MAC_MAC_FORCED	2
 #define SGMII_LINK_MAC_FIBER		3
+#define SGMII_LINK_MAC_PHY_FORCED	4
 
 #define TARGET_SGMII_EXTERNAL_SERDES
 #define TARGET_SGMII_TYPE_2             /* Use second sgmii setup sequence */

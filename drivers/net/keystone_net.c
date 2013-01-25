@@ -318,18 +318,18 @@ static void  __attribute__((unused)) tci6614_eth_gigabit_enable(void)
 {
 	u_int16_t data;
 
-	if (!tci6614_eth_phy_read(active_phy_addr, 0, &data)) {
-		if (data & (1 << 6)) { /* speed selection MSB */
-			/*
-			 * Check if link detected is giga-bit
-			 * If Gigabit mode detected, enable gigbit in MAC
-			 */
-			writel(readl(&adap_emac->MACCONTROL) |
-				EMAC_MACCONTROL_GIGFORCE |
-				EMAC_MACCONTROL_GIGABIT_ENABLE,
-				&adap_emac->MACCONTROL);
-		}
-	}
+#ifndef CONFIG_SYS_NO_MDIO
+	if (tci6614_eth_phy_read(active_phy_addr, 0, &data) ||
+		!(data & (1 << 6))) /* speed selection MSB */
+		return;
+#endif
+
+	/*
+	 * Check if link detected is giga-bit
+	 * If Gigabit mode detected, enable gigbit in MAC
+	 */
+	writel(readl(&adap_emac->MACCONTROL) | EMAC_MACCONTROL_GIGFORCE |
+		EMAC_MACCONTROL_GIGABIT_ENABLE, &adap_emac->MACCONTROL);
 }
 
 #ifndef CONFIG_SOC_TCI6638
@@ -447,6 +447,7 @@ int keystone_sgmii_config(int port, int interface)
 
 		break;
 	case SGMII_LINK_MAC_PHY:
+	case SGMII_LINK_MAC_PHY_FORCED:
 		mr_adv_ability	= SGMII_REG_MR_ADV_ENABLE;
 		control		= SGMII_REG_CONTROL_AUTONEG;
 
@@ -740,6 +741,7 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 	 */
 	hwConfigStreamingSwitch();
 
+#ifndef CONFIG_SYS_NO_MDIO
 	/* Init MDIO & get link state */
 	clkdiv = (EMAC_MDIO_BUS_FREQ / EMAC_MDIO_CLOCK_FREQ) - 1;
 	writel((clkdiv & 0xff) | MDIO_CONTROL_ENABLE | MDIO_CONTROL_FAULT,
@@ -751,6 +753,7 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 	link = keystone_get_link_status();
 	if (link == 0)
 		return -1;
+#endif
 
 	emac_gigabit_enable();
 
@@ -888,6 +891,7 @@ int tci6614_emac_initialize(void)
 	SgmiiDefSerdesSetup156p25Mhz();
 #endif
 
+#ifndef CONFIG_SYS_NO_MDIO
 	tci6614_eth_mdio_enable();
 
 	for (i = 0; i < 256; i++) {
@@ -939,6 +943,7 @@ int tci6614_emac_initialize(void)
 	printf("Ethernet PHY: %s\n", phy.name);
 
 	miiphy_register(phy.name, tci6614_mii_phy_read, tci6614_mii_phy_write);
+#endif
 
 	return(0);
 }
