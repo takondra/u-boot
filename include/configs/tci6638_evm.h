@@ -180,7 +180,7 @@
 // "install_skernel 0xc030000; bootm 0x88000000 - 0x80000200;"
 #define CONFIG_BOOTARGS \
 		"console=ttyS0,115200n8 debug earlyprintk " \
-		" rdinit=/bin/ash rw root=/dev/ram0 initrd=0x805000000,9M"
+		" rdinit=/bin/ash rw root=/dev/ram0 initrd=0x85000000,9M"
 
 #define CONFIG_CMDLINE_EDITING
 #define CONFIG_VERSION_VARIABLE
