@@ -63,28 +63,31 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 
 };
 
+#define CORE_PLL_799	{ CORE_PLL,	13,	1,	2 }
 #define CORE_PLL_983	{ CORE_PLL,	16,	1,	2 }
 #define PASS_PLL_1228	{ PASS_PLL,	20,	1,	2 }
+#define TETRIS_PLL_500  { TETRIS_PLL,	8,	1,	2 }
 #define TETRIS_PLL_750  { TETRIS_PLL,	12,	1,	2 }
 #define TETRIS_PLL_812  { TETRIS_PLL,	13,	1,	2 }
 #define TETRIS_PLL_875  { TETRIS_PLL,	14,	1,	2 }
+#define DDR3_PLL_200(x)	{ DDR3##x##_PLL,4,	1,	2 }
 #define DDR3_PLL_400(x)	{ DDR3##x##_PLL,8,	1,	2 }
 #define DDR3_PLL_800(x)	{ DDR3##x##_PLL,16,	1,	2 }
 
 static struct pll_init_data pll_config[] = {
-	CORE_PLL_983,
+	CORE_PLL_799,
 	PASS_PLL_1228,
-	TETRIS_PLL_750,
-	DDR3_PLL_400(A),
-	DDR3_PLL_800(B)
+	TETRIS_PLL_500,
+	DDR3_PLL_200(A),
+	DDR3_PLL_200(B)
 };
 
 static struct ddr3_emif_config ddr3_1600_64 = {
-	.sdcfg		= 0x6600CE6Aul,
+	.sdcfg		= 0x6200CE62ul,
 	.sdtim1		= 0x16709C55ul,
 	.sdtim2		= 0x00001D4Aul,
-	.sdtim3		= 0x435DFF53ul,
-	.sdtim4		= 0x543F0CFFul,
+	.sdtim3		= 0x435DFF54ul,
+	.sdtim4		= 0x553F0CFFul,
 	.zqcfg		= 0xF0073200ul,
 	.sdrfc		= 0x00001869ul,
 };
@@ -99,14 +102,90 @@ static struct ddr3_emif_config ddr3_1600_32 = {
 	.sdrfc		= 0x00001869ul,
 };
 
+static struct ddr3_emif_config ddr3_1333_64 = {
+	.sdcfg		= 0x62008C62ul,
+	.sdtim1		= 0x125C8044ul,
+	.sdtim2		= 0x00001D29ul,
+	.sdtim3		= 0x32CDFF43ul,
+	.sdtim4		= 0x543F0ADFul,
+	.zqcfg		= 0xF0073200ul,
+	.sdrfc		= 0x00001457ul,
+};
+
+static struct ddr3_emif_config ddr3_1333_32 = {
+	.sdcfg		= 0x62008C62ul,
+	.sdtim1		= 0x125C8044ul,
+	.sdtim2		= 0x00001D29ul,
+	.sdtim3		= 0x32CDFF43ul,
+	.sdtim4		= 0x543F0ADFul,
+	.zqcfg		= 0xF0073200ul,
+	.sdrfc		= 0x00001457ul,
+};
+
+static struct ddr3_emif_config ddr3_1066_64 = {
+	.sdcfg		= 0x62004662ul,
+	.sdtim1		= 0x0E4C6833ul,
+	.sdtim2		= 0x00001CE7ul,
+	.sdtim3		= 0x323DFF32ul,
+	.sdtim4		= 0x533F08AFul,
+	.zqcfg		= 0xF0073200ul,
+	.sdrfc		= 0x00001044ul,
+};
+
+static struct ddr3_emif_config ddr3_1066_32 = {
+	.sdcfg		= 0x62005662ul,
+	.sdtim1		= 0x0E4C6833ul,
+	.sdtim2		= 0x00001CE7ul,
+	.sdtim3		= 0x323DFF32ul,
+	.sdtim4		= 0x533F08AFul,
+	.zqcfg		= 0xF0073200ul,
+	.sdrfc		= 0x00001044ul,
+};
+
 static struct ddr3_emif_config ddr3_800_64 = {
-	.sdcfg		= 0x6600046Aul,
-	.sdtim1		= 0x0A344C23ul,
+	.sdcfg		= 0x62000462ul,
+	.sdtim1		= 0x0A384C23ul,
 	.sdtim2		= 0x00001CA5ul,
 	.sdtim3		= 0x21ADFF32ul,
 	.sdtim4		= 0x533F067Ful,
 	.zqcfg		= 0xF0073200ul,
 	.sdrfc		= 0x00000C34ul,
+};
+
+static struct ddr3_emif_config ddr3_800_32 = {
+	.sdcfg		= 0x62001462ul,
+	.sdtim1		= 0x0A384C23ul,
+	.sdtim2		= 0x00001CA5ul,
+	.sdtim3		= 0x21ADFF32ul,
+	.sdtim4		= 0x533F067Ful,
+	.zqcfg		= 0xF0073200ul,
+	.sdrfc		= 0x00000C34ul,
+};
+
+static struct ddr3_phy_config ddr3phy_1600_64 = {
+	.pllcr		= 0x0001C000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x0D861A80ul,
+	.ptr4		= 0x0C827100ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27)),
+	.dtpr0		= 0xA19DBB66ul,
+	.dtpr1		= 0x12868300ul,
+	.dtpr2		= 0x50035200ul,
+	.mr0		= 0x00001C70ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000018ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F07A12ul,
+	.zq0cr1		= 0x0000005Dul,
+	.zq1cr1		= 0x0000005Bul,
+	.zq2cr1		= 0x0000005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
 };
 
 static struct ddr3_phy_config ddr3phy_1600_32 = {
@@ -126,13 +205,169 @@ static struct ddr3_phy_config ddr3phy_1600_32 = {
 	.mr0		= 0x00001C70ul,
 	.mr1		= 0x00000006ul,
 	.mr2		= 0x00000018ul,
-	.dtcr		= 0x730035C7ul,
+	.dtcr		= 0x710035C7ul,
 	.pgcr2		= 0x00F07A12ul,
 	.zq0cr1		= 0x0000005Dul,
 	.zq1cr1		= 0x0000005Bul,
 	.zq2cr1		= 0x0000005Bul,
 	.pir_v1		= 0x00000033ul,
 	.pir_v2		= 0x0000FF81ul,
+};
+
+static struct ddr3_phy_config ddr3phy_1333_64 = {
+	.pllcr		= 0x0005C000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x0B4515C2ul,
+	.ptr4		= 0x0A6E08B4ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27)),
+	.dtpr0		= 0x8558AA55ul,
+	.dtpr1		= 0x12857280ul,
+	.dtpr2		= 0x5002C200ul,
+	.mr0		= 0x00001A60ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000010ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F065B8ul,
+	.zq0cr1		= 0x0000005Dul,
+	.zq1cr1		= 0x0000005Bul,
+	.zq2cr1		= 0x0000005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
+};
+
+static struct ddr3_phy_config ddr3phy_1333_32 = {
+	.pllcr		= 0x0005C000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x0B4515C2ul,
+	.ptr4		= 0x0A6E08B4ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK | UDIMM_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27) | (1 << 29)),
+	.dtpr0		= 0x8558AA55ul,
+	.dtpr1		= 0x12857280ul,
+	.dtpr2		= 0x5002C200ul,
+	.mr0		= 0x00001A60ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000010ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F065B8ul,
+	.zq0cr1		= 0x0000005Dul,
+	.zq1cr1		= 0x0000005Bul,
+	.zq2cr1		= 0x0000005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
+};
+
+static struct ddr3_phy_config ddr3phy_1066_64 = {
+	.pllcr		= 0x000DC000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x09041104ul,
+	.ptr4		= 0x0855A068ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27)),
+	.dtpr0		= 0x6D148844ul,
+	.dtpr1		= 0x12845A00ul,
+	.dtpr2		= 0x50023600ul,
+	.mr0		= 0x00001830ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000008ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F05159ul,
+	.zq0cr1		= 0x0000005Dul,
+	.zq1cr1		= 0x0000005Bul,
+	.zq2cr1		= 0x0000005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
+};
+
+static struct ddr3_phy_config ddr3phy_1066_32 = {
+	.pllcr		= 0x000DC000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x09041104ul,
+	.ptr4		= 0x0855A068ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK | UDIMM_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27) | (1 << 29)),
+	.dtpr0		= 0x6D148844ul,
+	.dtpr1		= 0x12845A00ul,
+	.dtpr2		= 0x50023600ul,
+	.mr0		= 0x00001870ul,
+	.mr1		= 0x00000044ul,
+	.mr2		= 0x00000018ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F05159ul,
+	.zq0cr1		= 0x0000005Dul,
+	.zq1cr1		= 0x0000005Bul,
+	.zq2cr1		= 0x0000005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
+};
+
+static struct ddr3_phy_config ddr3phy_800_64 = {
+	.pllcr		= 0x000DC000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x06C30D40ul,
+	.ptr4		= 0x06413880ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27)),
+	.dtpr0		= 0x50CE6644ul,
+	.dtpr1		= 0x12834180ul,
+	.dtpr2		= 0x50022A00ul,
+	.mr0		= 0x00001420ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000000ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F03D09ul,
+	.zq0cr1		= 0x0000005Dul,
+	.zq1cr1		= 0x0000005Bul,
+	.zq2cr1		= 0x0000005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x00000F81ul,
+};
+
+static struct ddr3_phy_config ddr3phy_800_32 = {
+	.pllcr		= 0x000DC000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x06C30D40ul,
+	.ptr4		= 0x06413880ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK | UDIMM_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27) | (1 << 29)),
+	.dtpr0		= 0x50CF6644ul,
+	.dtpr1		= 0x12834180ul,
+	.dtpr2		= 0x50022A00ul,
+	.mr0		= 0x00001420ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000000ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F03D09ul,
+	.zq0cr1		= 0x0000005Dul,
+	.zq1cr1		= 0x0000005Bul,
+	.zq2cr1		= 0x0000005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x00000F81ul,
 };
 
 void init_ddrphy(u32 base, struct ddr3_phy_config *phy_cfg)
@@ -226,11 +461,11 @@ int board_early_init_f(void)
 {
 	init_plls(ARRAY_SIZE(pll_config), pll_config);
 
-//	init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1600_32);
-//	init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_32);
+	init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_800_32);
+	init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_800_32);
 
-//	init_ddrphy(TCI6638_DDR3B_DDRPHYC, &ddr3phy_1600_32);
-//	init_ddremif(TCI6638_DDR3B_EMIF_CTRL_BASE, &ddr3_1600_32);
+	init_ddrphy(TCI6638_DDR3B_DDRPHYC, &ddr3phy_800_64);
+	init_ddremif(TCI6638_DDR3B_EMIF_CTRL_BASE, &ddr3_800_64);
 
 	return 0;
 }
