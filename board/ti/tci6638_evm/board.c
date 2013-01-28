@@ -142,7 +142,7 @@ static struct ddr3_emif_config ddr3_1066_32 = {
 	.sdrfc		= 0x00001044ul,
 };
 
-static struct ddr3_emif_config ddr3_800_64 = {
+static struct ddr3_emif_config ddr3_200_64 = {
 	.sdcfg		= 0x62000462ul,
 	.sdtim1		= 0x0A384C23ul,
 	.sdtim2		= 0x00001CA5ul,
@@ -152,7 +152,7 @@ static struct ddr3_emif_config ddr3_800_64 = {
 	.sdrfc		= 0x00000C34ul,
 };
 
-static struct ddr3_emif_config ddr3_800_32 = {
+static struct ddr3_emif_config ddr3_200_32 = {
 	.sdcfg		= 0x62001462ul,
 	.sdtim1		= 0x0A384C23ul,
 	.sdtim2		= 0x00001CA5ul,
@@ -318,7 +318,7 @@ static struct ddr3_phy_config ddr3phy_1066_32 = {
 	.pir_v2		= 0x0000FF81ul,
 };
 
-static struct ddr3_phy_config ddr3phy_800_64 = {
+static struct ddr3_phy_config ddr3phy_200_64 = {
 	.pllcr		= 0x000DC000ul,
 	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
@@ -344,7 +344,7 @@ static struct ddr3_phy_config ddr3phy_800_64 = {
 	.pir_v2		= 0x00000F81ul,
 };
 
-static struct ddr3_phy_config ddr3phy_800_32 = {
+static struct ddr3_phy_config ddr3phy_200_32 = {
 	.pllcr		= 0x000DC000ul,
 	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
@@ -461,11 +461,11 @@ int board_early_init_f(void)
 {
 	init_plls(ARRAY_SIZE(pll_config), pll_config);
 
-	init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_800_32);
-	init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_800_32);
+	init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_200_32);
+	init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_200_32);
 
-	init_ddrphy(TCI6638_DDR3B_DDRPHYC, &ddr3phy_800_64);
-	init_ddremif(TCI6638_DDR3B_EMIF_CTRL_BASE, &ddr3_800_64);
+	init_ddrphy(TCI6638_DDR3B_DDRPHYC, &ddr3phy_200_64);
+	init_ddremif(TCI6638_DDR3B_EMIF_CTRL_BASE, &ddr3_200_64);
 
 	return 0;
 }
