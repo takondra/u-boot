@@ -43,8 +43,7 @@ struct timer_regs {
 #define TIMER_LOAD_VAL	0xffffffff
 #define TIM_CLK_DIV	16
 
-static ulong timestamp;
-static ulong lastinc;
+DECLARE_GLOBAL_DATA_PTR;
 
 int timer_init(void)
 {
@@ -63,7 +62,8 @@ int timer_init(void)
 
 void reset_timer(void)
 {
-	lastinc = timestamp = 0;
+	gd->lastinc = 0;
+	gd->tbl     = 0;
 
 	__raw_writel(0,		&regs->tcr);
 	__raw_writel(0,		&regs->tim34);
@@ -74,14 +74,14 @@ static ulong get_timer_raw(void)
 {
 	ulong now = __raw_readl(&regs->tim34);
 
-	if (now >= lastinc)
-		timestamp += now - lastinc;
+	if (now >= gd->lastinc)
+		gd->tbl += now - gd->lastinc;
 	else
-		timestamp += now + TIMER_LOAD_VAL - lastinc;
+		gd->tbl += now + TIMER_LOAD_VAL - gd->lastinc;
 
-	lastinc = now;
+	gd->lastinc = now;
 
-	return timestamp;
+	return gd->tbl;
 }
 
 ulong get_timer(ulong base)
@@ -91,7 +91,7 @@ ulong get_timer(ulong base)
 
 void set_timer(ulong t)
 {
-	timestamp = t;
+	gd->tbl = t;
 }
 
 unsigned long long get_ticks(void)
