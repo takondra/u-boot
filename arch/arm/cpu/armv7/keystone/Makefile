@@ -29,6 +29,7 @@ COBJS	+= timer.o
 endif
 ifdef CONFIG_SOC_TCI6638
 COBJS	+= cmd_skern.o
+COBJS	+= cmd_fmtimg.o
 endif
 
 SOBJS	+= lowlevel_init.o reset.o
