@@ -22,13 +22,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  * MA 02111-1307 USA
  */
-#ifndef _DAVINCI_I2C_H_
-#define _DAVINCI_I2C_H_
+#ifndef _KEYSTONE_I2C_H_
+#define _KEYSTONE_I2C_H_
 
 #define I2C_WRITE		0
 #define I2C_READ		1
 
-#define I2C_BASE		0x02530000
+#define I2C0_BASE		0x02530000
+#define I2C1_BASE		0x02530400
+#define I2C2_BASE		0x02530800
+#define I2C_BASE		I2C0_BASE
 
 #define	I2C_OA			(I2C_BASE + 0x00)
 #define I2C_IE			(I2C_BASE + 0x04)
