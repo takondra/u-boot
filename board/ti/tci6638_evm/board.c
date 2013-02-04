@@ -69,6 +69,7 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 #define TETRIS_PLL_500  { TETRIS_PLL,	8,	1,	2 }
 #define TETRIS_PLL_750  { TETRIS_PLL,	12,	1,	2 }
 #define TETRIS_PLL_687  { TETRIS_PLL,	11,	1,	2 }
+#define TETRIS_PLL_625  { TETRIS_PLL,	10,	1,	2 }
 #define TETRIS_PLL_812  { TETRIS_PLL,	13,	1,	2 }
 #define TETRIS_PLL_875  { TETRIS_PLL,	14,	1,	2 }
 #define DDR3_PLL_200(x)	{ DDR3##x##_PLL,4,	1,	2 }
@@ -78,7 +79,7 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 static struct pll_init_data pll_config[] = {
 	CORE_PLL_799,
 	PASS_PLL_1228,
-	TETRIS_PLL_687,
+	TETRIS_PLL_625,
 	DDR3_PLL_200(A),
 	DDR3_PLL_200(B)
 };
