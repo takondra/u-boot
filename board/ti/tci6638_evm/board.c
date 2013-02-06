@@ -83,6 +83,18 @@ static struct pll_init_data pll_config[] = {
 	DDR3_PLL_200(B)
 };
 
+#ifdef CONFIG_SPL_BOARD_INIT
+static struct pll_init_data spl_pll_config[] = {
+	CORE_PLL_799,
+	TETRIS_PLL_500,
+};
+
+void spl_init_keystone_plls(void)
+{
+	init_plls(ARRAY_SIZE(spl_pll_config), spl_pll_config);
+}
+#endif
+
 static struct ddr3_emif_config ddr3_1600_64 = {
 	.sdcfg		= 0x6200CE62ul,
 	.sdtim1		= 0x16709C55ul,

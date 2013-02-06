@@ -35,6 +35,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 void spl_board_init(void)
 {
+	spl_init_keystone_plls();
 	preloader_console_init();
 }
 
