@@ -48,13 +48,8 @@
 
 /* Memory Info */
 #define CONFIG_NR_DRAM_BANKS		1
-#if 0
 #define PHYS_SDRAM_1			0x80000000
 #define PHYS_SDRAM_1_SIZE		(512 << 20)	/* 2 MiB */
-#else
-#define MSM_RELOCATE_ADDR		0x0c200000
-#define MSM_SIZE			(2 << 20)	/* 2 MB */
-#endif
 
 /* SPL SPI Loader Configuration */
 #define CONFIG_SPL_TEXT_BASE		0x0c200000
@@ -146,10 +141,11 @@
 #define CONFIG_SYS_NAND_PAGE_2K
 
 #define CONFIG_SYS_NAND_LARGEPAGE
-#define CONFIG_SYS_NAND_BASE_LIST	{ 0x70000000, }
+#define CONFIG_SYS_NAND_BASE_LIST	{ 0x30000000, }
 /* socket has two chipselects, nCE0 gated by address BIT(14) */
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
 #define CONFIG_SYS_NAND_MAX_CHIPS	1
+#define CONFIG_SYS_NAND_NO_SUBPAGE_WRITE
 
 /* U-Boot command configuration */
 #include <config_cmd_default.h>
@@ -178,7 +174,9 @@
 #define CONFIG_MTD_DEVICE
 #define CONFIG_CMD_NAND
 #define CONFIG_CMD_UBI
+#define CONFIG_CMD_UBIFS
 #define CONFIG_RBTREE
+#define CONFIG_LZO
 #endif
 
 #define CONFIG_CRC32_VERIFY
@@ -206,7 +204,6 @@
 #define CONFIG_ENV_IS_NOWHERE
 #endif
 
-#if 0
 #if defined(CONFIG_MMC) && !defined(CONFIG_ENV_IS_IN_NAND)
 #define CONFIG_CMD_ENV
 #define CONFIG_ENV_SIZE		(16 << 10)	/* 16 KiB */
@@ -214,15 +211,17 @@
 #define CONFIG_ENV_IS_IN_MMC
 #undef CONFIG_ENV_IS_IN_FLASH
 #endif
-#endif
 
-#define CONFIG_BOOTDELAY	99
+#define CONFIG_BOOTDELAY	3
 #define CONFIG_BOOTCOMMAND \
-	"xx"
+		"ubi part ubifs; ubifsmount boot; ubifsload 0x88000000 uImage; " \
+		"ubifsload 0x87000000 tci6638-evm.dtb; " \
+		"ubifsload 0xc5f0000 skern-keystone-evm.bin; " \
+		"install_skern 0xc5f0000; " bootm 0x88000000 - 0x87000000" \
 
 #define CONFIG_BOOTARGS \
-		"console=ttyS0,115200n8 debug earlyprintk " \
-		" rdinit=/bin/ash rw root=/dev/ram0 initrd=0x85000000,9M"
+	"console=ttyS0,115200n8 mem=512M rootwait=1 rootfstype=ubifs " \
+	"root=ubi0:rootfs rootflags=sync rw ubi.mtd=2,2048 "
 
 #define CONFIG_CMDLINE_EDITING
 #define CONFIG_VERSION_VARIABLE
@@ -259,12 +258,11 @@
 #endif
 
 #define PART_PARAMS     "512k(params)ro,"
-#define PART_KERNEL		"4352k(kernel),"	/* kernel + initramfs */
-#define PART_REST		"204928k(filesystem)"
+#define PART_UBIFS		"129536k(ubifs)"
 #define PART_RESERVED	"-(reserved)"
 
 #define MTDPARTS_DEFAULT	\
-	"mtdparts=davinci_nand.0:" PART_BOOT PART_PARAMS PART_KERNEL PART_REST PART_RESERVED
+	"mtdparts=davinci_nand.0:" PART_BOOT PART_PARAMS PART_UBIFS
 
 
 #define CONFIG_MAX_RAM_BANK_SIZE	(128 << 20)	/* 128 MB */

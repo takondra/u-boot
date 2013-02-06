@@ -28,13 +28,8 @@
 
 #include <asm/arch/hardware.h>
 
-#ifdef CONFIG_TCI6614_EVM
 #define	MASK_CLE	0x4000
 #define	MASK_ALE	0x2000
-#else
-#define	MASK_CLE	0x10
-#define	MASK_ALE	0x08
-#endif
 
 #define NAND_READ_START		0x00
 #define NAND_READ_END		0x30

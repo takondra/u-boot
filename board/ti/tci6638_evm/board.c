@@ -51,13 +51,13 @@ unsigned int external_clk[ext_clk_count] = {
 static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 	{			/* CS0 */
 		.mode		= ASYNC_EMIF_MODE_NAND,
-		.wr_setup	= 5,
-		.wr_strobe	= 5,
-		.wr_hold	= 2,
-		.rd_setup	= 5,
-		.rd_strobe	= 5,
-		.rd_hold	= 2,
-		.turn_around	= 5,
+		.wr_setup	= 0xf,
+		.wr_strobe	= 0x3f,
+		.wr_hold	= 7,
+		.rd_setup	= 0xf,
+		.rd_strobe	= 0x3f,
+		.rd_hold	= 7,
+		.turn_around	= 3,
 		.width		= ASYNC_EMIF_8,
 	},
 
