@@ -1025,19 +1025,19 @@ void SgmiiDefSerdesSetup156p25Mhz()
 
 	/*Waiting for SGMII Serdes PLL lock.*/
 	for (cnt = 10000;
-	     cnt > 0 && ((readl(0x02090100) & 0x10) == 0);
+	     cnt > 0 && ((readl(0x02090114) & 0x10) == 0);
 	     cnt--);
 
 	for (cnt = 10000;
-	     cnt > 0 && ((readl(0x02090200) & 0x10) == 0);
+	     cnt > 0 && ((readl(0x02090214) & 0x10) == 0);
 	     cnt--);
 
 	for (cnt = 10000;
-	     cnt > 0 && ((readl(0x02090400) & 0x10) == 0);
+	     cnt > 0 && ((readl(0x02090414) & 0x10) == 0);
 	     cnt--);
 
 	for (cnt = 10000;
-	     cnt > 0 && ((readl(0x02090500) & 0x10) == 0);
+	     cnt > 0 && ((readl(0x02090514) & 0x10) == 0);
 	     cnt--);
 
 	chip_delay(45000);
