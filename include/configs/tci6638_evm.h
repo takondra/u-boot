@@ -113,7 +113,6 @@
 #define CONFIG_NET_RETRY_COUNT	10
 #define CONFIG_NET_MULTI
 
-//#define SGMII_FIXED_OPTION
 #ifdef SGMII_FIXED_OPTION
 #define CONFIG_SYS_SGMII_INTERFACE	{ SGMII_LINK_MAC_PHY_FORCED, \
 					  SGMII_LINK_MAC_PHY_FORCED }
@@ -217,7 +216,7 @@
 		"ubi part ubifs; ubifsmount boot; ubifsload 0x88000000 uImage; " \
 		"ubifsload 0x87000000 tci6638-evm.dtb; " \
 		"ubifsload 0xc5f0000 skern-keystone-evm.bin; " \
-		"install_skern 0xc5f0000; " bootm 0x88000000 - 0x87000000" \
+		"install_skern 0xc5f0000; bootm 0x88000000 - 0x87000000" \
 
 #define CONFIG_BOOTARGS \
 	"console=ttyS0,115200n8 mem=512M rootwait=1 rootfstype=ubifs " \
