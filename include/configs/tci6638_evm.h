@@ -32,6 +32,7 @@
 #define CONFIG_SYS_NO_FLASH		/* that is, no *NOR* flash */
 #define CONFIG_SYS_CONSOLE_INFO_QUIET
 #define CONFIG_BOARD_EARLY_INIT_F
+#define CONFIG_SYS_THUMB_BUILD
 
 /* SoC Configuration */
 #define CONFIG_ARMV7						/* ARM Cortex A8 CPU */

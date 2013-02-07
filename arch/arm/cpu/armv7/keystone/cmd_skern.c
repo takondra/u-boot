@@ -92,7 +92,11 @@ int tetris_core_on(int core_id, void *ep)
 		"stmfd  r13!, {lr}\n"
 		"mov r0, %1\n"
 		"mov r1, %2\n"
+#ifdef CONFIG_SYS_THUMB_BUILD
+		".inst.w  0xe1600070\n"
+#else
 		".inst  0xe1600070\n"
+#endif
 		"ldmfd  r13!, {lr}\n"
 		: "=&r" (result)
 		: "r" (core_id), "r" (ep)
@@ -107,7 +111,11 @@ int tetris_core_off(int core_id)
 	asm volatile (
 		"stmfd  r13!, {lr}\n"
 		"mov r0, %1\n"
+#ifdef CONFIG_SYS_THUMB_BUILD
+		".inst.w  0xe1600071\n"
+#else
 		".inst  0xe1600071\n"
+#endif
 		"ldmfd  r13!, {lr}\n"
 		: "=&r" (result)
 		: "r" (core_id)
