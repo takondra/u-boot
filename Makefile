@@ -531,6 +531,15 @@ $(obj)u-boot.spr:	$(obj)u-boot.img $(obj)spl/u-boot-spl.bin
 			conv=notrunc 2>/dev/null
 		cat $(obj)spl/u-boot-spl-pad.img $(obj)u-boot.img > $@
 
+$(obj)u-boot-spi.gph:	$(obj)u-boot.img $(obj)spl/u-boot-spl.bin
+		$(obj)tools/mkimage -A $(ARCH) -T gpimage -C none \
+			-a $(CONFIG_SPL_TEXT_BASE) -e $(CONFIG_SPL_TEXT_BASE) \
+			-n SPL -d $(obj)spl/u-boot-spl.bin $(obj)spl/u-boot-spl.gph
+		$(OBJCOPY) ${OBJCFLAGS} -I binary \
+			--pad-to=$(CONFIG_SPL_PAD_TO) --gap-fill=0 -O binary \
+			$(obj)spl/u-boot-spl.gph $(obj)spl/u-boot-spl-pad.gph
+		cat $(obj)spl/u-boot-spl-pad.gph $(obj)u-boot.img > $@
+
 ifeq ($(SOC),tegra20)
 ifeq ($(CONFIG_OF_SEPARATE),y)
 nodtb=dtb
