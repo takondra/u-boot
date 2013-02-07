@@ -157,5 +157,6 @@ void init_default_image_type (void);
 void init_fit_image_type (void);
 void init_ubl_image_type(void);
 void init_omap_image_type(void);
+void init_gpimage_type(void);
 
 #endif /* _MKIIMAGE_H_ */

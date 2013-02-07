@@ -95,6 +95,7 @@ NOPED_OBJ_FILES-y += kwbimage.o
 NOPED_OBJ_FILES-y += pblimage.o
 NOPED_OBJ_FILES-y += imximage.o
 NOPED_OBJ_FILES-y += omapimage.o
+NOPED_OBJ_FILES-y += gpimage.o
 NOPED_OBJ_FILES-y += mkenvimage.o
 NOPED_OBJ_FILES-y += mkimage.o
 OBJ_FILES-$(CONFIG_SMDK5250) += mkexynosspl.o
@@ -214,6 +215,7 @@ $(obj)mkimage$(SFX):	$(obj)aisimage.o \
 			$(obj)mkimage.o \
 			$(obj)os_support.o \
 			$(obj)omapimage.o \
+			$(obj)gpimage.o \
 			$(obj)sha1.o \
 			$(obj)ublimage.o \
 			$(LIBFDT_OBJS)

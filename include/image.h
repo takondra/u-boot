@@ -166,6 +166,7 @@
 #define IH_TYPE_AISIMAGE	13	/* TI Davinci AIS Image		*/
 #define IH_TYPE_KERNEL_NOLOAD	14	/* OS Kernel Image, can run from any load address */
 #define IH_TYPE_PBLIMAGE	15	/* Freescale PBL Boot Image	*/
+#define IH_TYPE_GPIMAGE		16	/* TI KeyStone GPHeader Image	*/
 
 /*
  * Compression Types
