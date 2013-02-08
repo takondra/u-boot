@@ -302,7 +302,6 @@ int packet_dma_rx_disable (const struct packet_dma_rx_cfg *cfg)
 	return (0);
 }
 
-#define RX_FLOW_NUM 23
 int packet_dma_rx_configure(const struct packet_dma_rx_cfg *cfg)
 {
 	u32 v, i;
