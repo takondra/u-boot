@@ -156,6 +156,16 @@ void nand_deselect(void);
 void board_nand_select_device(struct nand_chip *nand, int chip);
 #endif
 
+#ifdef CONFIG_CMD_NAND_ECCLAYOUT
+int board_nand_ecclayout_get_idx(
+	struct nand_chip *nand, struct nand_ecclayout *p);
+
+struct nand_ecclayout *board_nand_ecclayout_get_layout(
+	struct nand_chip *nand, int idx);
+
+int board_nand_ecclayout_set(struct nand_chip *nand, int idx);
+#endif
+
 __attribute__((noreturn)) void nand_boot(void);
 
 #endif

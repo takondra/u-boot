@@ -428,6 +428,50 @@ static int raw_access(nand_info_t *nand, ulong addr, loff_t off, ulong count,
 	return ret;
 }
 
+#ifdef CONFIG_CMD_NAND_ECCLAYOUT
+static void nand_print_ecclayout_info(struct nand_ecclayout *p)
+{
+	struct nand_oobfree *oobfree;
+	int i, j;
+	if (!p)
+		return;
+
+	printf("  num ecc bytes: %d\n", p->eccbytes);
+	printf("  ecc pos:\n    ");
+	i = 0;
+	j = 0;
+	while (i < p->eccbytes) {
+		if (j >= 8) {
+			printf("\n    ");
+			j=0;
+		}
+		printf("%2d ", p->eccpos[i]);
+		++i;
+		++j;
+        }
+	printf("\n  oobfree:\n");
+	printf("    offset length\n");
+	i = 0;
+	oobfree = &(p->oobfree[0]);
+	while (oobfree->length && i < MTD_MAX_OOBFREE_ENTRIES) {
+		printf("     %2d    %2d\n", oobfree->offset, oobfree->length);
+		++i;
+		++oobfree;
+	}
+}
+
+static void nand_print_device_ecclayout(int dev)
+{
+	nand_info_t *nand = &nand_info[dev];
+	struct nand_chip *chip = nand->priv;
+	int idx;
+
+	idx = board_nand_ecclayout_get_idx(chip, chip->ecc.layout);
+	printf("\necc layout %d:\n", idx);
+	nand_print_ecclayout_info(chip->ecc.layout);
+}
+#endif
+
 static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	int i, ret = 0;
@@ -472,8 +516,12 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			putc('\n');
 			if (dev < 0 || dev >= CONFIG_SYS_MAX_NAND_DEVICE)
 				puts("no devices available\n");
-			else
+			else {
 				nand_print_and_set_info(dev);
+#ifdef CONFIG_CMD_NAND_ECCLAYOUT
+				nand_print_device_ecclayout(dev);
+#endif
+			}
 			return 0;
 		}
 
@@ -795,6 +843,54 @@ static int do_nand(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	}
 #endif
 
+#ifdef CONFIG_CMD_NAND_ECCLAYOUT
+	if (strcmp(cmd, "ecclayout") == 0) {
+		nand_info_t *nand = &nand_info[dev];
+		struct nand_chip *chip = nand->priv;
+		struct nand_ecclayout *p;
+		int idx;
+
+		if (argc < 3) {
+			printf("Current device ecclayout:\n");
+			nand_print_device_ecclayout(dev);
+			return 0;
+		}
+
+		if (!strcmp(argv[2], "set")) {
+			if (argc < 4)
+				return 1;
+			idx = (int)simple_strtoul(argv[3], NULL, 10);
+			if(0 != board_nand_ecclayout_set(chip, idx))
+				printf("Setting current device"
+					" to ecc layout %d FAILED!\n", idx);
+			else {
+				p = chip->ecc.layout;
+				p->oobavail = 0;
+				for (i = 0; p->oobfree[i].length &&
+					i < ARRAY_SIZE(p->oobfree); i++)
+					p->oobavail += p->oobfree[i].length;
+				nand->oobavail = p->oobavail;
+			}
+			return 0;
+		}
+
+		if (strcmp(argv[2], "all") != 0)
+			return 1;
+
+		/* show all available ecc layouts */
+		printf("Available ecc layouts:\n");
+		idx = 0;
+		p = board_nand_ecclayout_get_layout(chip, idx);
+		while(p) {
+			printf("\nlayout %d:\n", idx);
+			nand_print_ecclayout_info(p);
+			p = board_nand_ecclayout_get_layout(chip, ++idx);
+		}
+
+		return 0;
+	}
+#endif
+
 usage:
 	return CMD_RET_USAGE;
 }
@@ -848,6 +944,12 @@ static char nand_help_text[] =
 	"    first device.\n"
 	"nand env.oob set off|partition - set enviromnent offset\n"
 	"nand env.oob get - get environment offset"
+#endif
+#ifdef CONFIG_CMD_NAND_ECCLAYOUT
+	"\n"
+	"nand ecclayout <set <idx>|all> - show or set ecclayout of current device\n"
+	"    'all' shows all available ecc layouts for setting to current device\n"
+	"    'set' sets current device ecc layout to layout indexed by idx\n"
 #endif
 	"";
 #endif
