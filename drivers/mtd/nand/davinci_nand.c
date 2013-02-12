@@ -306,6 +306,93 @@ static struct nand_ecclayout nand_davinci_4bit_layout_oobfirst = {
 #endif
 };
 
+#if defined(CONFIG_CMD_NAND_ECCLAYOUT)
+#if defined(CONFIG_SYS_NAND_PAGE_2K)
+static struct nand_ecclayout nand_davinci_rbl_4bit_layout_oobfirst = {
+	.eccbytes = 40,
+	.eccpos = {
+		6, 7,
+		8, 9, 10, 11, 12, 13, 14, 15,
+		22, 23,
+		24, 25, 26, 27, 28, 29, 30, 31,
+		38, 39,
+		40, 41, 42, 43, 44, 45, 46, 47,
+		54, 55,
+		56, 57, 58, 59, 60, 61, 62, 63,
+		},
+	.oobfree = {
+		{.offset = 2, .length = 4, },
+		{.offset = 16, .length = 6, },
+		{.offset = 32, .length = 6, },
+		{.offset = 48, .length = 6, },
+	},
+};
+#endif
+
+#define NAND_ECCLAYOUT_NUM 2
+
+struct nand_ecclayout davinci_nand_ecclayout;
+
+struct nand_ecclayout *davinci_nand_ecclayouts[NAND_ECCLAYOUT_NUM] = {
+	&nand_davinci_4bit_layout_oobfirst,
+	&nand_davinci_rbl_4bit_layout_oobfirst,
+};
+
+static int is_same_ecclayout(
+	struct nand_ecclayout *p, struct nand_ecclayout *q)
+{
+	uint32_t temp1, temp2;
+	int ret;
+
+	temp1 = p->oobavail;
+	temp2 = q->oobavail;
+	p->oobavail = q->oobavail = 0;
+	ret = memcmp(p, q, sizeof(struct nand_ecclayout));
+	p->oobavail = temp1;
+	q->oobavail = temp2;
+	return !ret;
+}
+
+int board_nand_ecclayout_get_idx(
+	struct nand_chip *nand, struct nand_ecclayout *p)
+{
+	int i;
+
+	if (!p)
+		return -1;
+
+	for (i=0; i<NAND_ECCLAYOUT_NUM; i++)
+		if (is_same_ecclayout(p, davinci_nand_ecclayouts[i]))
+			return i;
+
+	return -1;
+}
+
+struct nand_ecclayout *board_nand_ecclayout_get_layout(
+	struct nand_chip *nand, int idx)
+{
+	if ((idx >= 0) && (idx < NAND_ECCLAYOUT_NUM))
+		return davinci_nand_ecclayouts[idx];
+	else
+		return NULL;
+}
+
+int board_nand_ecclayout_set(struct nand_chip *nand, int idx)
+{
+	struct nand_ecclayout *layout;
+	uint32_t oobavail;
+	int i;
+
+	if (idx < 0 || idx >= NAND_ECCLAYOUT_NUM)
+		return -1;
+
+	memcpy(nand->ecc.layout, davinci_nand_ecclayouts[idx],
+		sizeof(struct nand_ecclayout));
+
+	return 0;
+}
+#endif
+
 static void nand_davinci_4bit_enable_hwecc(struct mtd_info *mtd, int mode)
 {
 	u32 val;
@@ -629,7 +716,14 @@ void davinci_nand_init(struct nand_chip *nand)
 	nand->ecc.calculate = nand_davinci_4bit_calculate_ecc;
 	nand->ecc.correct = nand_davinci_4bit_correct_data;
 	nand->ecc.hwctl = nand_davinci_4bit_enable_hwecc;
+#ifndef CONFIG_CMD_NAND_ECCLAYOUT
 	nand->ecc.layout = &nand_davinci_4bit_layout_oobfirst;
+#else
+	memcpy(&davinci_nand_ecclayout,
+		&nand_davinci_4bit_layout_oobfirst,
+		sizeof(struct nand_ecclayout));
+	nand->ecc.layout = &davinci_nand_ecclayout;
+#endif
 #endif
 	/* Set address of hardware control function */
 	nand->cmd_ctrl = nand_davinci_hwcontrol;
