@@ -47,7 +47,7 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
 
 #ifdef CONFIG_SOC_TCI6638
 /* MDIO module input frequency */
-#define EMAC_MDIO_BUS_FREQ			100000000
+#define EMAC_MDIO_BUS_FREQ			(clk_get_rate(pass_pll_clk))
 /* MDIO clock output frequency */
 #define EMAC_MDIO_CLOCK_FREQ		1000000		/* 1.0 MHz */
 #endif
