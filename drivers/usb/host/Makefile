@@ -57,6 +57,9 @@ COBJS-$(CONFIG_USB_EHCI_PCI) += ehci-pci.o
 COBJS-$(CONFIG_USB_EHCI_TEGRA) += ehci-tegra.o
 COBJS-$(CONFIG_USB_EHCI_VCT) += ehci-vct.o
 
+# xchi
+COBJS-$(CONFIG_USB_XHCI) += xhci.o
+
 COBJS	:= $(COBJS-y)
 SRCS	:= $(COBJS:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS))
@@ -65,6 +68,9 @@ all:	$(LIB)
 
 $(LIB):	$(obj).depend $(OBJS)
 	$(call cmd_link_o_target, $(OBJS))
+
+# SEE README.arm-unaligned-accesses
+$(obj)xhci.o: CFLAGS += $(PLATFORM_NO_UNALIGNED)
 
 #########################################################################
 
