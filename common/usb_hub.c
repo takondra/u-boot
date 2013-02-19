@@ -261,12 +261,16 @@ void usb_hub_port_connect_change(struct usb_device *dev, int port,
 	/* Allocate a new device struct for it */
 	usb = usb_alloc_new_device(dev->controller);
 
+#ifdef CONFIG_USB_XHCI
+	usb->speed = dev->speed;
+#else
 	if (portstatus & USB_PORT_STAT_HIGH_SPEED)
 		usb->speed = USB_SPEED_HIGH;
 	else if (portstatus & USB_PORT_STAT_LOW_SPEED)
 		usb->speed = USB_SPEED_LOW;
 	else
 		usb->speed = USB_SPEED_FULL;
+#endif
 
 	dev->children[port] = usb;
 	usb->parent = dev;
