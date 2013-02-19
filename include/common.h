@@ -211,6 +211,8 @@ typedef void (interrupt_handler_t)(void *);
 #define MIN(x, y)  min(x, y)
 #define MAX(x, y)  max(x, y)
 
+#define min3(a, b, c)	min(min(a, b), c)
+
 /*
  * Return the absolute value of a number.
  *

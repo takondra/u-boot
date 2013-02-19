@@ -204,7 +204,12 @@ int hub_port_reset(struct usb_device *dev, int port,
 }
 
 
-void usb_hub_port_connect_change(struct usb_device *dev, int port)
+/*
+ * Adding the flag do_port_reset: USB 2.0 device requires port reset
+ * while USB 3.0 device does not.
+ */
+void usb_hub_port_connect_change(struct usb_device *dev, int port,
+							int do_port_reset)
 {
 	struct usb_device *usb;
 	ALLOC_CACHE_ALIGN_BUFFER(struct usb_port_status, portsts, 1);
@@ -235,11 +240,21 @@ void usb_hub_port_connect_change(struct usb_device *dev, int port)
 	}
 	mdelay(200);
 
+#ifdef CONFIG_USB_XHCI
+	/* Reset the port */
+	if (do_port_reset) {
+		if (hub_port_reset(dev, port, &portstatus) < 0) {
+			printf("cannot reset port %i!?\n", port + 1);
+			return;
+		}
+	}
+#else
 	/* Reset the port */
 	if (hub_port_reset(dev, port, &portstatus) < 0) {
 		printf("cannot reset port %i!?\n", port + 1);
 		return;
 	}
+#endif
 
 	mdelay(200);
 
@@ -434,7 +449,10 @@ static int usb_hub_configure(struct usb_device *dev)
 
 		if (portchange & USB_PORT_STAT_C_CONNECTION) {
 			USB_HUB_PRINTF("port %d connection change\n", i + 1);
-			usb_hub_port_connect_change(dev, i);
+			usb_hub_port_connect_change(dev, i, 0);
+		} else if ((portstatus & 0x1) == 1) {
+			USB_HUB_PRINTF("port %d connection change\n", i + 1);
+			usb_hub_port_connect_change(dev, i, 1);
 		}
 		if (portchange & USB_PORT_STAT_C_ENABLE) {
 			USB_HUB_PRINTF("port %d enable change, status %x\n",
@@ -451,7 +469,7 @@ static int usb_hub_configure(struct usb_device *dev)
 				USB_HUB_PRINTF("already running port %i "  \
 						"disabled by hub (EMI?), " \
 						"re-enabling...\n", i + 1);
-					usb_hub_port_connect_change(dev, i);
+					usb_hub_port_connect_change(dev, i, 0);
 			}
 		}
 		if (portstatus & USB_PORT_STAT_SUSPEND) {
@@ -495,7 +513,7 @@ int usb_hub_probe(struct usb_device *dev, int ifnum)
 	/* Multiple endpoints? What kind of mutant ninja-hub is this? */
 	if (iface->desc.bNumEndpoints != 1)
 		return 0;
-	ep = &iface->ep_desc[0];
+	ep = &iface->ep_desc[0].ep_desc;
 	/* Output endpoint? Curiousier and curiousier.. */
 	if (!(ep->bEndpointAddress & USB_DIR_IN))
 		return 0;

@@ -262,7 +262,7 @@ static void usb_display_config(struct usb_device *dev)
 		ifdesc = &config->if_desc[i];
 		usb_display_if_desc(&ifdesc->desc, dev);
 		for (ii = 0; ii < ifdesc->no_of_ep; ii++) {
-			epdesc = &ifdesc->ep_desc[ii];
+			epdesc = &ifdesc->ep_desc[ii].ep_desc;
 			usb_display_ep_desc(epdesc);
 		}
 	}
@@ -271,7 +271,9 @@ static void usb_display_config(struct usb_device *dev)
 
 static inline char *portspeed(int speed)
 {
-	if (speed == USB_SPEED_HIGH)
+	if (speed == USB_SPEED_SUPER)
+		return "5 Gb/s";
+	else if (speed == USB_SPEED_HIGH)
 		return "480 Mb/s";
 	else if (speed == USB_SPEED_LOW)
 		return "1.5 Mb/s";

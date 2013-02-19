@@ -192,6 +192,15 @@
  * standard usb descriptor structures
  */
 
+/* USB_DT_SS_ENDPOINT_COMP: SuperSpeed Endpoint Companion descriptor */
+struct usb_ss_ep_comp_descriptor {
+	u8  bLength;
+	u8  bDescriptorType;	/* 0x30 */
+	u8  bMaxBurst;
+	u8  bmAttributes;
+	u16 wBytesPerInterval;
+} __attribute__ ((packed));
+
 struct usb_endpoint_descriptor {
 	u8 bLength;
 	u8 bDescriptorType;	/* 0x5 */

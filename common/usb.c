@@ -304,7 +304,7 @@ usb_set_maxpacket_ep(struct usb_device *dev, int if_idx, int ep_idx)
 	struct usb_endpoint_descriptor *ep;
 	u16 ep_wMaxPacketSize;
 
-	ep = &dev->config.if_desc[if_idx].ep_desc[ep_idx];
+	ep = &dev->config.if_desc[if_idx].ep_desc[ep_idx].ep_desc;
 
 	b = ep->bEndpointAddress & USB_ENDPOINT_NUMBER_MASK;
 	ep_wMaxPacketSize = get_unaligned(&ep->wMaxPacketSize);
@@ -360,6 +360,7 @@ static int usb_parse_config(struct usb_device *dev,
 	int index, ifno, epno, curr_if_num;
 	int i;
 	u16 ep_wMaxPacketSize;
+	struct usb_interface *if_desc = NULL;
 
 	ifno = -1;
 	epno = -1;
@@ -401,20 +402,26 @@ static int usb_parse_config(struct usb_device *dev,
 			break;
 		case USB_DT_ENDPOINT:
 			epno = dev->config.if_desc[ifno].no_of_ep;
+			if_desc = &dev->config.if_desc[ifno];
 			/* found an endpoint */
-			dev->config.if_desc[ifno].no_of_ep++;
-			memcpy(&dev->config.if_desc[ifno].ep_desc[epno],
+			if_desc->no_of_ep++;
+			memcpy(&if_desc->ep_desc[epno].ep_desc,
 				&buffer[index], buffer[index]);
 			ep_wMaxPacketSize = get_unaligned(&dev->config.\
 							if_desc[ifno].\
 							ep_desc[epno].\
-							wMaxPacketSize);
+							ep_desc.wMaxPacketSize);
 			put_unaligned(le16_to_cpu(ep_wMaxPacketSize),
 					&dev->config.\
 					if_desc[ifno].\
 					ep_desc[epno].\
-					wMaxPacketSize);
+					ep_desc.wMaxPacketSize);
 			USB_PRINTF("if %d, ep %d\n", ifno, epno);
+			break;
+		case USB_DT_SS_ENDPOINT_COMP:
+			if_desc = &dev->config.if_desc[ifno];
+			memcpy(&(if_desc->ep_desc[epno].ss_ep_comp),
+				&buffer[index], buffer[index]);
 			break;
 		default:
 			if (head->bLength == 0)
@@ -659,6 +666,18 @@ static int usb_get_string(struct usb_device *dev, unsigned short langid,
 	return result;
 }
 
+/* Allocate usb device */
+int usb_alloc_dev(struct usb_device *dev)
+{
+	int res;
+
+	USB_PRINTF("alloc device\n");
+	res = usb_control_msg(dev, usb_sndctrlpipe(dev->parent, 0),
+				USB_REQ_ALLOC_DEV, 0, 0, 0,
+				NULL, 0, USB_CNTL_TIMEOUT);
+
+	return res;
+}
 
 static void usb_try_string_workarounds(unsigned char *buf, int *length)
 {
@@ -864,7 +883,10 @@ int usb_new_device(struct usb_device *dev)
 	struct usb_device_descriptor *desc;
 	int port = -1;
 	struct usb_device *parent = dev->parent;
+
+#ifndef CONFIG_USB_XHCI
 	unsigned short portstatus;
+#endif
 
 	/* send 64-byte GET-DEVICE-DESCRIPTOR request.  Since the descriptor is
 	 * only 18 bytes long, this will terminate with a short packet.  But if
@@ -901,12 +923,21 @@ int usb_new_device(struct usb_device *dev)
 			return 1;
 		}
 
+	/*
+	 * Putting up the code here for slot assignment and initialization:
+	 * xHCI spec sec 4.3.2, 4.3.3
+	 */
+#ifdef CONFIG_USB_XHCI
+		/* Call if and only if device is attached and detected */
+		usb_alloc_dev(dev);
+#else
 		/* reset the port for the second time */
 		err = hub_port_reset(dev->parent, port, &portstatus);
 		if (err < 0) {
 			printf("\n     Couldn't reset port %i\n", port);
 			return 1;
 		}
+#endif
 	}
 #endif
 

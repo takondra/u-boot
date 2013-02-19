@@ -67,6 +67,16 @@ struct devrequest {
 	unsigned short	length;
 } __attribute__ ((packed));
 
+struct usb_ep_desc {
+	struct usb_endpoint_descriptor		ep_desc;
+	/*
+	 * Super Speed Device will have Super Speed Endpoint
+	 * Companion Descriptor  (section 9.6.7 of usb 3.0 spec)
+	 * Revision 1.0 June 6th 2011
+	 */
+	struct usb_ss_ep_comp_descriptor	ss_ep_comp;
+};
+
 /* Interface */
 struct usb_interface {
 	struct usb_interface_descriptor desc;
@@ -75,7 +85,7 @@ struct usb_interface {
 	unsigned char	num_altsetting;
 	unsigned char	act_altsetting;
 
-	struct usb_endpoint_descriptor ep_desc[USB_MAXENDPOINTS];
+	struct usb_ep_desc ep_desc[USB_MAXENDPOINTS];
 } __attribute__ ((packed));
 
 /* Configuration information.. */
@@ -149,7 +159,8 @@ struct usb_device {
 	defined(CONFIG_USB_OMAP3) || defined(CONFIG_USB_DA8XX) || \
 	defined(CONFIG_USB_BLACKFIN) || defined(CONFIG_USB_AM35X) || \
 	defined(CONFIG_USB_MUSB_DSPS) || defined(CONFIG_USB_MUSB_AM35X) || \
-	defined(CONFIG_USB_MUSB_OMAP2PLUS)
+	defined(CONFIG_USB_MUSB_OMAP2PLUS) || \
+	defined(CONFIG_USB_XHCI)
 
 int usb_lowlevel_init(int index, void **controller);
 int usb_lowlevel_stop(int index);

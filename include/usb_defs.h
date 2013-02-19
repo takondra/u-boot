@@ -87,6 +87,9 @@
 #define USB_DT_INTERFACE     0x04
 #define USB_DT_ENDPOINT      0x05
 
+/* From the USB 3.0 spec */
+#define USB_DT_SS_ENDPOINT_COMP		0x30
+
 #define USB_DT_HID          (USB_TYPE_CLASS | 0x01)
 #define USB_DT_REPORT       (USB_TYPE_CLASS | 0x02)
 #define USB_DT_PHYSICAL     (USB_TYPE_CLASS | 0x03)
@@ -150,6 +153,7 @@
 #define USB_REQ_SET_IDLE            0x0A
 #define USB_REQ_SET_PROTOCOL        0x0B
 
+#define USB_REQ_ALLOC_DEV		0xDE
 
 /* "pipe" definitions */
 
@@ -220,6 +224,23 @@
 #define USB_PORT_STAT_HIGH_SPEED    0x0400	/* support for EHCI */
 #define USB_PORT_STAT_SPEED	\
 	(USB_PORT_STAT_LOW_SPEED | USB_PORT_STAT_HIGH_SPEED)
+
+/*
+ * Additions to wPortStatus bit field from USB 3.0
+ * See USB 3.0 spec Table 10-10
+ */
+#define USB_PORT_STAT_LINK_STATE	0x01e0
+#define USB_SS_PORT_STAT_POWER		0x0200
+#define USB_SS_PORT_STAT_SPEED		0x1c00
+#define USB_PORT_STAT_SPEED_5GBPS	0x0000
+
+/*
+ * USB 3.0 wPortChange bit fields
+ * See USB 3.0 spec Table 10-11
+ */
+#define USB_PORT_STAT_C_BH_RESET	0x0020
+#define USB_PORT_STAT_C_LINK_STATE	0x0040
+#define USB_PORT_STAT_C_CONFIG_ERROR	0x0080
 
 /* wPortChange bits */
 #define USB_PORT_STAT_C_CONNECTION  0x0001
