@@ -2300,15 +2300,20 @@ static void inc_deq(struct xhci_ctrl *ctrl, struct xhci_ring *ring,
 static void handle_port_status(struct xhci_ctrl *ctrl, union xhci_trb *event)
 {
 	int max_ports;
+	int port_id;
 
 	/* Port status change events always have a successful completion code */
 	if (((le32_to_cpu(event->generic.field[2]) &
 			COMP_CODE_MASK) >> COMP_CODE_SHIFT) != COMP_SUCCESS)
 		return;
 
-	ctrl->port_id = (((le32_to_cpu(event->generic.field[0]) &
+	port_id = (((le32_to_cpu(event->generic.field[0]) &
 			PORT_ID_MASK) >> PORT_ID_SHIFT));
+	if (ctrl->handle_portStatus_Flag & (1 << port_id))
+		return;
 
+	ctrl->handle_portStatus_Flag |= (1 << port_id);
+	ctrl->port_id = port_id;
 	max_ports = ((readl(&ctrl->hccr->cr_hcsparams1) &
 			HCS_MAX_PORTS_MASK) >> HCS_MAX_PORTS_SHIFT);
 
