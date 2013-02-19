@@ -1957,26 +1957,26 @@ static unsigned int xhci_port_speed(struct usb_device *usbdev,
 	struct xhci_ctrl *ctrl = usbdev->controller;
 
 	if (DEV_FULLSPEED(port_status)) {
-		usbdev->speed = 0;
+		usbdev->speed = USB_SPEED_FULL;
 		debug("SPEED = FULLSPEED\n");
 		ctrl->speed = usbdev->speed;
 		return 0x1;
 	}
 	if (DEV_LOWSPEED(port_status)) {
 		debug("SPEED = LOWSPEED\n");
-		usbdev->speed = 1;
+		usbdev->speed = USB_SPEED_LOW;
 		ctrl->speed = usbdev->speed;
 		return 0x2;
 	}
 	if (DEV_HIGHSPEED(port_status)) {
 		debug("SPEED = HIGHSPEED\n");
-		usbdev->speed = 2;
+		usbdev->speed = USB_SPEED_HIGH;
 		ctrl->speed = usbdev->speed;
 		return 0x3;
 	}
 	if (DEV_SUPERSPEED(port_status)) {
 		debug("SPEED = SUPERSPEED\n");
-		usbdev->speed = 3;
+		usbdev->speed = USB_SPEED_SUPER;
 		ctrl->speed = usbdev->speed;
 		return 0x4;
 	}
