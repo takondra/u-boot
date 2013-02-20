@@ -540,6 +540,11 @@ $(obj)u-boot-spi.gph:	$(obj)u-boot.img $(obj)spl/u-boot-spl.bin
 			$(obj)spl/u-boot-spl.gph $(obj)spl/u-boot-spl-pad.gph
 		cat $(obj)spl/u-boot-spl-pad.gph $(obj)u-boot.img > $@
 
+$(obj)u-boot-nand.gph:	$(obj)u-boot.bin
+		$(obj)tools/mkimage -A $(ARCH) -T gpimage -C none \
+			-a $(CONFIG_SYS_TEXT_BASE) -e $(CONFIG_SYS_TEXT_BASE) \
+			-n U-Boot -d $(obj)u-boot.bin $@
+
 ifeq ($(SOC),tegra20)
 ifeq ($(CONFIG_OF_SEPARATE),y)
 nodtb=dtb
