@@ -59,17 +59,19 @@ int do_install_skernel(cmd_tbl_t *cmdtp, int flag, int argc,
 			char * const argv[])
 {
 	/* TODO: dpsc_base has to come from device tree */
-	u32 addr, dpsc_base = 0x1E80000, freq = 1000000000;
+	u32 addr, dpsc_base = 0x1E80000, freq;
 	int     rcode = 0;
 
 	if (argc < 2)
 		return CMD_RET_USAGE;
 
+	freq = clk_get_rate(sys_clk0_6_clk);
+
 	addr = simple_strtoul(argv[1], NULL, 16);
 
 	printf ("## Starting boot kernel at 0x%08x ...\n", addr);
 	rcode = skern_install(addr, dpsc_base, freq);
-	printf ("## Started boot kernel successfully\n");
+	printf ("## Started boot kernel successfully, freq [%d]\n", freq);
 	return rcode;
 }
 
