@@ -555,6 +555,8 @@ int32_t cpmac_drv_send(u_int8_t* buffer, int num_bytes)
 	hd->orig_buff_len	= num_bytes;
 	hd->buff_ptr		= (u_int32_t)buffer;
 	hd->orig_buff_ptr	= (u_int32_t)buffer;
+	hd->swinfo2 |= hd->swinfo2 & ~(0x00070000) |
+		((CONFIG_SLAVE_PORT_NUM + 1) << 16);
 
 	/* Return the descriptor back to the transmit queue */
 	QM_DESC_PINFO_SET_QM(hd->packet_info, 0);
@@ -660,7 +662,8 @@ int ethss_config(u32 ctl, u32 max_pkt_size)
 
 	/* Reset and enable the ALE */
 	DEVICE_REG32_W(DEVICE_CPSW_BASE + CPSW_REG_ALE_CONTROL,
-		       CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE);
+		       CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE |
+		       CPSW_REG_VAL_ALE_CTL_BYPASS);
 
 	/* All ports put into forward mode */
 	for (i = 0; i < DEVICE_CPSW_NUM_PORTS; i++)
@@ -759,8 +762,6 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 	emac_gigabit_enable();
 
 	ethss_start();
-
-	cpmac_drv_send (pkt_buf, EMAC_MIN_ETHERNET_PKT_SIZE);
 
 	debug_emac("- emac_open\n");
 

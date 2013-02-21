@@ -168,7 +168,8 @@ struct mac_sl_cfg {
 
 /* Register values */
 #define CPSW_REG_VAL_STAT_ENABLE_ALL             0xf
-#define CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE   ((u_int32_t)0xc0000000)
+#define CPSW_REG_VAL_ALE_CTL_RESET_AND_ENABLE	((u_int32_t)0xc0000000)
+#define CPSW_REG_VAL_ALE_CTL_BYPASS		((u_int32_t)0x00000010)
 #define CPSW_REG_VAL_PORTCTL_FORWARD_MODE        0x3
 
 #define PA_MAGIC_ID  0x0CEC11E0
