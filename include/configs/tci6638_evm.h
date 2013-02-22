@@ -20,14 +20,14 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+/* Platform type */
 #define CONFIG_SOC_TCI6638
+#define CONFIG_TCI6638_EVM
 
 #include <asm/arch/hardware.h>
 #include <asm/arch/clock.h>
 
-/* TCI6638 EVM board */
-#define CONFIG_TCI6638_EVM
-
+/* U-Boot Build Configuration */
 #define CONFIG_SKIP_LOWLEVEL_INIT	/* U-Boot is a 2nd stage loader */
 #define CONFIG_SYS_NO_FLASH		/* that is, no *NOR* flash */
 #define CONFIG_SYS_CONSOLE_INFO_QUIET
@@ -35,22 +35,25 @@
 #define CONFIG_SYS_THUMB_BUILD
 
 /* SoC Configuration */
-#define CONFIG_ARMV7						/* ARM Cortex A8 CPU */
+#define CONFIG_ARMV7
 #define CONFIG_ARCH_CPU_INIT
 #define CONFIG_SYS_ARCH_TIMER
 #define CONFIG_SYS_HZ_CLOCK		clk_get_rate(TCI6638_CLK1_6)
-#define CONFIG_SYS_HZ			1000			/* ticks per second */
-
+#define CONFIG_SYS_HZ			1000
 #define CONFIG_SYS_TEXT_BASE		0x0c001000
+#define CONFIG_OF_LIBFDT		1
+#define CONFIG_SYS_DCACHE_OFF
 
-#define CONFIG_OF_LIBFDT	1
-
-#define CONFIG_L2_OFF
-
-/* Memory Info */
+/* Memory Configuration */
 #define CONFIG_NR_DRAM_BANKS		1
-#define PHYS_SDRAM_1			0x80000000
-#define PHYS_SDRAM_1_SIZE		(512 << 20)	/* 2 MiB */
+#define CONFIG_SYS_SDRAM_BASE		0x80000000
+#define CONFIG_MAX_RAM_BANK_SIZE	(2 << 30)	/* 2GB */
+#define CONFIG_STACKSIZE		(512 << 10)	/* 512 KiB */
+#define CONFIG_SYS_MALLOC_LEN		(512 << 10)	/* 512 KiB */
+#define CONFIG_SYS_MEMTEST_START	CONFIG_SYS_SDRAM_BASE
+#define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_SDRAM_BASE + 32 << 20)
+#define CONFIG_SYS_INIT_SP_ADDR		(CONFIG_SYS_TEXT_BASE -	\
+					 GENERATED_GBL_DATA_SIZE)
 
 /* SPL SPI Loader Configuration */
 #define CONFIG_SPL_TEXT_BASE		0x0c200000
@@ -78,7 +81,7 @@
 #define CONFIG_SYS_SPI_U_BOOT_OFFS	CONFIG_SPL_PAD_TO
 #define CONFIG_SPL_FRAMEWORK
 
-/* Serial Driver info: UART0 for console  */
+/* UART Configuration */
 #define CONFIG_SYS_NS16550
 #define CONFIG_SYS_NS16550_SERIAL
 #define CONFIG_SYS_NS16550_REG_SIZE	-4
@@ -88,6 +91,7 @@
 #define CONFIG_CONS_INDEX		1
 #define CONFIG_BAUDRATE			115200
 
+/* SPI Configuration */
 #define CONFIG_SPI
 #define CONFIG_SPI_FLASH
 #define CONFIG_SPI_FLASH_STMICRO
@@ -96,7 +100,12 @@
 #define CONFIG_SYS_SPI_CLK		clk_get_rate(TCI6638_LPSC_EMIF25_SPI)
 #define CONFIG_SF_DEFAULT_SPEED		30000000
 #define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
-#define CONFIG_CMD_SF
+
+/* I2C Configuration */
+#define CONFIG_HARD_I2C
+#define CONFIG_DRIVER_DAVINCI_I2C
+#define CONFIG_SYS_I2C_SPEED		100000
+#define CONFIG_SYS_I2C_SLAVE		0x10	/* SMBus host address */
 
 /* EEPROM definitions */
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN		2
@@ -113,180 +122,129 @@
 #define CONFIG_BOOTP_DNS
 #define CONFIG_BOOTP_DNS2
 #define CONFIG_BOOTP_SEND_HOSTNAME
-#define CONFIG_NET_RETRY_COUNT	10
+#define CONFIG_NET_RETRY_COUNT		10
 #define CONFIG_NET_MULTI
-#define RX_FLOW_NUM (22 + CONFIG_SLAVE_PORT_NUM)
-
-#ifdef SGMII_FIXED_OPTION
-#define CONFIG_SYS_SGMII_INTERFACE	{ SGMII_LINK_MAC_PHY_FORCED, \
-					  SGMII_LINK_MAC_PHY_FORCED }
-#define CONFIG_SYS_NO_MDIO
-#else
-#define CONFIG_SYS_SGMII_INTERFACE	{SGMII_LINK_MAC_PHY, \
-					SGMII_LINK_MAC_PHY   \
-					}
-#endif
+#define RX_FLOW_NUM			(22 + CONFIG_SLAVE_PORT_NUM)
+#define CONFIG_SYS_SGMII_INTERFACE	{ SGMII_LINK_MAC_PHY,	\
+					  SGMII_LINK_MAC_PHY }
 #define CONFIG_SYS_SGMII_REFCLK_MHZ	312
 #define CONFIG_SYS_SGMII_LINERATE_MHZ	1250
 #define	CONFIG_SYS_SGMII_RATESCALE	2
 
-/* I2C */
-#define CONFIG_HARD_I2C
-#define CONFIG_DRIVER_DAVINCI_I2C
-#define CONFIG_SYS_I2C_SPEED		100000
-#define CONFIG_SYS_I2C_SLAVE		0x10	/* SMBus host address */
-
-/* NAND: socketed, two chipselects, normally 2 GBytes */
+/* NAND Configuration */
 #define CONFIG_NAND_DAVINCI
 #define CONFIG_SYS_NAND_CS		2
 #define CONFIG_SYS_NAND_USE_FLASH_BBT
 #define CONFIG_SYS_NAND_4BIT_HW_ECC_OOBFIRST
 #define CONFIG_SYS_NAND_PAGE_2K
-
 #define CONFIG_SYS_NAND_LARGEPAGE
 #define CONFIG_SYS_NAND_BASE_LIST	{ 0x30000000, }
-/* socket has two chipselects, nCE0 gated by address BIT(14) */
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
 #define CONFIG_SYS_NAND_MAX_CHIPS	1
 #define CONFIG_SYS_NAND_NO_SUBPAGE_WRITE
+#define CONFIG_ENV_SIZE			(256 << 10)	/* 256 KiB */
+#define CONFIG_ENV_IS_IN_NAND
+#define CONFIG_ENV_OFFSET		0x100000
+#define CONFIG_MTD_PARTITIONS
+#define CONFIG_MTD_DEVICE
+#define CONFIG_RBTREE
+#define CONFIG_LZO
+#define MTDIDS_DEFAULT			"nand0=davinci_nand.0"
+#define PART_BOOT			"1024k(bootloader)ro,"
+#define PART_PARAMS			"512k(params)ro,"
+#define PART_UBI			"-(ubi)"
+#define MTDPARTS_DEFAULT		"mtdparts=davinci_nand.0:"	\
+					PART_BOOT PART_PARAMS PART_UBI
+
+/* USB Configuration */
+#define CONFIG_USB_XHCI
+#define CONFIG_USB_XHCI_KEYSTONE
+#define CONFIG_SYS_USB_XHCI_MAX_ROOT_PORTS	2
+#define CONFIG_USB_STORAGE
+#define CONFIG_DOS_PARTITION
+#define CONFIG_EFI_PARTITION
+#define CONFIG_FS_FAT
 
 /* U-Boot command configuration */
 #include <config_cmd_default.h>
-
 #undef CONFIG_CMD_BDI
 #undef CONFIG_CMD_FLASH
 #undef CONFIG_CMD_FPGA
 #undef CONFIG_CMD_SETGETDCR
-
 #define CONFIG_CMD_ASKENV
 #define CONFIG_CMD_DHCP
 #define CONFIG_CMD_I2C
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_SAVES
-
-#ifdef CONFIG_MMC
-#define CONFIG_DOS_PARTITION
-#define CONFIG_CMD_EXT2
-#define CONFIG_CMD_FAT
-#define CONFIG_CMD_MMC
-#endif
-
-#ifdef CONFIG_NAND_DAVINCI
 #define CONFIG_CMD_MTDPARTS
-#define CONFIG_MTD_PARTITIONS
-#define CONFIG_MTD_DEVICE
 #define CONFIG_CMD_NAND
 #define CONFIG_CMD_UBI
 #define CONFIG_CMD_UBIFS
-#define CONFIG_RBTREE
-#define CONFIG_LZO
 #define CONFIG_CMD_NAND_ECCLAYOUT
-#endif
-
-#define CONFIG_CRC32_VERIFY
-#define CONFIG_MX_CYCLIC
+#define CONFIG_CMD_USB
+#define CONFIG_CMD_FAT
+#define CONFIG_CMD_SF
 
 /* U-Boot general configuration */
-#undef CONFIG_USE_IRQ				/* No IRQ/FIQ in U-Boot */
-#define CONFIG_BOOTFILE		"uImage"	/* Boot file name */
-#define CONFIG_SYS_PROMPT	"TCI6638 EVM # "	/* Monitor Command Prompt */
-#define CONFIG_SYS_CBSIZE	1024		/* Console I/O Buffer Size  */
-#define CONFIG_SYS_PBSIZE			/* Print buffer size */ \
-		(CONFIG_SYS_CBSIZE + sizeof(CONFIG_SYS_PROMPT) + 16)
-#define CONFIG_SYS_MAXARGS	16		/* max number of command args */
+#define CONFIG_SYS_PROMPT		"TCI6638 EVM # "
+#define CONFIG_SYS_CBSIZE		1024
+#define CONFIG_SYS_PBSIZE		2048
+#define CONFIG_SYS_MAXARGS		16
 #define CONFIG_SYS_HUSH_PARSER
 #define CONFIG_SYS_PROMPT_HUSH_PS2	"> "
 #define CONFIG_SYS_LONGHELP
-
-#ifdef CONFIG_NAND_DAVINCI
-#define CONFIG_ENV_SIZE		(256 << 10)	/* 256 KiB */
-#define CONFIG_ENV_IS_IN_NAND
-#define CONFIG_ENV_OFFSET	0x100000
-#undef CONFIG_ENV_IS_IN_FLASH
-#else
-#define CONFIG_ENV_SIZE                (256 << 10)     /* 256 KiB */
-#define CONFIG_ENV_IS_NOWHERE
-#endif
-
-#if defined(CONFIG_MMC) && !defined(CONFIG_ENV_IS_IN_NAND)
-#define CONFIG_CMD_ENV
-#define CONFIG_ENV_SIZE		(16 << 10)	/* 16 KiB */
-#define CONFIG_ENV_OFFSET	(51 << 9)	/* Sector 51 */
-#define CONFIG_ENV_IS_IN_MMC
-#undef CONFIG_ENV_IS_IN_FLASH
-#endif
-
-#define CONFIG_BOOTDELAY	3
-#define CONFIG_BOOTCOMMAND \
-		"ubi part ubifs; ubifsmount boot; ubifsload 0x88000000 uImage; " \
-		"ubifsload 0x87000000 tci6638-evm.dtb; " \
-		"ubifsload 0xc5f0000 skern-keystone-evm.bin; " \
-		"install_skern 0xc5f0000; bootm 0x88000000 - 0x87000000" \
-
-#define CONFIG_BOOTARGS \
-	"console=ttyS0,115200n8 mem=512M rootwait=1 rootfstype=ubifs " \
-	"root=ubi0:rootfs rootflags=sync rw ubi.mtd=2,2048 "
-
+#define CONFIG_CRC32_VERIFY
+#define CONFIG_MX_CYCLIC
 #define CONFIG_CMDLINE_EDITING
 #define CONFIG_VERSION_VARIABLE
 #define CONFIG_TIMESTAMP
 
-/* U-Boot memory configuration */
-#define CONFIG_STACKSIZE		(512 << 10)	/* 512 KiB */
-#define CONFIG_SYS_MALLOC_LEN		(512 << 10)	/* 512 KiB */
-#define CONFIG_SYS_MEMTEST_START	0x87000000	/* physical address */
-#define CONFIG_SYS_MEMTEST_END		0x88000000	/* test 16MB RAM */
+#define CONFIG_BOOTDELAY		3
+#define CONFIG_BOOTFILE			"uImage"
+#define CONFIG_EXTRA_ENV_SETTINGS					\
+	"boot=net\0"							\
+	"tftp_root=/\0"							\
+	"nfs_root=/export\0"						\
+	"addr_fdt=0x87000000\0"						\
+	"addr_kern=0x88000000\0"					\
+	"addr_mon=0x0c5f0000\0"						\
+	"addr_uboot=0x87000000\0"					\
+	"fdt_high=0xffffffff\0"						\
+	"name_fdt=uImage-keystone-evm.dtb\0"				\
+	"name_kern=uImage-keystone-evm.bin\0"				\
+	"name_mon=skern-keystone-evm.bin\0"				\
+	"name_uboot=u-boot-spi-keystone-evm.gph\0"			\
+	"run_mon=mon_install ${addr_mon}\0"				\
+	"run_kern=bootm ${addr_kern} - ${addr_fdt}\0"			\
+	"init_net=run args_all args_net\0"				\
+	"init_ubi=run args_all args_ubi; "				\
+		"ubi part ubifs; ubifsmount boot\0"			\
+	"get_fdt_net=dhcp ${addr_fdt} ${tftp_root}/${name_fdt}\0"	\
+	"get_fdt_ubi=ubifsload ${addr_fdt} ${name_fdt}\0"		\
+	"get_kern_net=dhcp ${addr_kern} ${tftp_root}/${name_kern}\0"	\
+	"get_kern_ubi=ubifsload ${addr_kern} ${name_kern}\0"		\
+	"get_mon_net=dhcp ${addr_mon} ${tftp_root}/${name_mon}\0"	\
+	"get_mon_ubi=ubifsload ${addr_mon} ${name_mon}\0"		\
+	"get_uboot_net=dhcp ${addr_uboot} ${tftp_root}/${name_uboot}\0"	\
+	"burn_uboot=sf probe; sf erase 0 0x100000; "			\
+		"sf write ${addr_uboot} 0 ${filesize}\0"		\
+	"args_all=setenv bootargs console=ttyS0,115200n8 rootwait=1\0"	\
+	"args_ubi=setenv bootargs ${bootargs} rootfstype=ubifs "	\
+		"root=ubi0:rootfs rootflags=sync rw ubi.mtd=2,2048\0"	\
+	"args_net=setenv bootargs ${bootargs} rootfstype=nfs "		\
+		"root=/dev/nfs rw nfsroot=${serverip}:${nfs_root},"	\
+		"${nfs_options} ip=dhcp\0"				\
+	"nfs_options=v3,tcp,rsize=4096,wsize=4096\0"
+#define CONFIG_BOOTCOMMAND						\
+	"run init_${boot} get_fdt_${boot} get_mon_${boot} "		\
+		"get_kern_${boot} run_mon run_kern"
+#define CONFIG_BOOTARGS							\
 
 /* Linux interfacing */
 #define CONFIG_CMDLINE_TAG
 #define CONFIG_SETUP_MEMORY_TAGS
-#define CONFIG_SYS_BARGSIZE	1024			/* bootarg Size */
-#define CONFIG_SYS_LOAD_ADDR	0x88000000		/* kernel load address */
-#define LINUX_BOOT_PARAM_ADDR	(0x80000000 + 0x100)
-
-/* NAND configuration issocketed with two chipselects just like the DM355 EVM.
- * It normally comes with a 2GByte SLC part with 2KB pages
- * (and 128KB erase blocks); other
- * 2GByte parts may have 4KB pages, 256KB erase blocks, and use MLC.  (MLC
- * pretty much demands the 4-bit ECC support.)  You can of course swap in
- * other parts, including small page ones.
- */
-#define MTDIDS_DEFAULT		"nand0=davinci_nand.0"
-
-#ifdef CONFIG_SYS_NAND_LARGEPAGE
-/*  Use same layout for 128K/256K blocks; allow some bad blocks */
-#define PART_BOOT		"1024k(bootloader)ro,"
-#else
-/* Assume 16K erase blocks; allow a few bad ones. */
-#define PART_BOOT		"512k(bootloader)ro,"
-#endif
-
-#define PART_PARAMS     "512k(params)ro,"
-#define PART_UBIFS		"129536k(ubifs)"
-#define PART_RESERVED	"-(reserved)"
-
-#define MTDPARTS_DEFAULT	\
-	"mtdparts=davinci_nand.0:" PART_BOOT PART_PARAMS PART_UBIFS
-
-
-#define CONFIG_MAX_RAM_BANK_SIZE	(128 << 20)	/* 128 MB */
-
-#define CONFIG_SYS_SDRAM_BASE		0x80000000
-#define CONFIG_SYS_INIT_SP_ADDR		\
-	(CONFIG_SYS_TEXT_BASE - GENERATED_GBL_DATA_SIZE)
-
-#define CONFIG_SYS_DCACHE_OFF
-
-/* USB */
-#define CONFIG_CMD_USB
-#define CONFIG_USB_XHCI
-#define CONFIG_USB_XHCI_KEYSTONE
-#define CONFIG_SYS_USB_XHCI_MAX_ROOT_PORTS	2
-#define CONFIG_USB_STORAGE
-
-#define CONFIG_CMD_FAT
-#define CONFIG_DOS_PARTITION
-#define CONFIG_EFI_PARTITION
-#define CONFIG_FS_FAT
+#define CONFIG_SYS_BARGSIZE		1024
+#define CONFIG_SYS_LOAD_ADDR		(CONFIG_SYS_SDRAM_BASE + 0x08000000)
+#define LINUX_BOOT_PARAM_ADDR		(CONFIG_SYS_SDRAM_BASE + 0x100)
 
 #endif /* __CONFIG_H */
