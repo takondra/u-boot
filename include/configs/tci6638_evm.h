@@ -42,6 +42,7 @@
 #define CONFIG_SYS_HZ			1000
 #define CONFIG_SYS_TEXT_BASE		0x0c001000
 #define CONFIG_OF_LIBFDT		1
+#define CONFIG_OF_BOARD_SETUP
 #define CONFIG_SYS_DCACHE_OFF
 
 /* Memory Configuration */
@@ -205,6 +206,8 @@
 	"boot=net\0"							\
 	"tftp_root=/\0"							\
 	"nfs_root=/export\0"						\
+	"mem_lpae=0\0"							\
+	"mem_reserve=512M\0"						\
 	"addr_fdt=0x87000000\0"						\
 	"addr_kern=0x88000000\0"					\
 	"addr_mon=0x0c5f0000\0"						\

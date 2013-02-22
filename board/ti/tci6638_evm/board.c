@@ -22,6 +22,8 @@
  */
 
 #include <common.h>
+#include <fdt_support.h>
+
 #include <asm/arch/hardware.h>
 #include <asm/arch/clock.h>
 #include <asm/io.h>
@@ -493,3 +495,46 @@ int board_init(void)
 	return 0;
 }
 
+#if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
+void ft_board_setup(void *blob, bd_t *bd)
+{
+	u64 start[CONFIG_NR_DRAM_BANKS];
+	u64 size[CONFIG_NR_DRAM_BANKS];
+	char name[32], *env, *endp;
+	int bank, lpae;
+
+	env = getenv("mem_lpae");
+	lpae = env && simple_strtol(env, NULL, 0);
+
+	for (bank = 0; bank < CONFIG_NR_DRAM_BANKS; bank++) {
+		start[bank] = bd->bi_dram[bank].start;
+		size[bank]  = bd->bi_dram[bank].size;
+
+		/* adjust memory start address for LPAE */
+		if (lpae) {
+			start[bank] -=  0x80000000;
+			start[bank] += 0x800000000;
+		}
+
+		/* reserve memory at start of bank */
+		if (bank)
+			sprintf(name, "mem_reserve_head%d", bank);
+		else
+			sprintf(name, "mem_reserve_head");
+		env = getenv(name);
+		if (env)
+			start[bank] += ustrtoul(env, &endp, 0);
+
+		/* reserve memory at end of bank if needed */
+		if (bank)
+			sprintf(name, "mem_reserve%d", bank);
+		else
+			sprintf(name, "mem_reserve");
+		env = getenv(name);
+		if (env)
+			size[bank] -= ustrtoul(env, &endp, 0);
+	}
+
+	fdt_fixup_memory_banks(blob, start, size, CONFIG_NR_DRAM_BANKS);
+}
+#endif
