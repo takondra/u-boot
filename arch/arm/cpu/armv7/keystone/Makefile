@@ -28,7 +28,7 @@ ifdef CONFIG_SOC_TCI6614
 COBJS	+= timer.o
 endif
 ifdef CONFIG_SOC_TCI6638
-COBJS	+= cmd_skern.o
+COBJS	+= cmd_mon.o
 COBJS	+= cmd_fmtimg.o
 endif
 ifdef CONFIG_SPL_BUILD

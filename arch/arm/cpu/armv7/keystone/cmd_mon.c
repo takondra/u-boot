@@ -21,24 +21,10 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-/***********************************************************************************
- * FILE PURPOSE: command for installing secure kernel
- ***********************************************************************************
- * FILE NAME: cmd_skern.c
- *
- * DESCRIPTION: The secure kernel module is used for installing boot code that
- * 		does following things:-
- *			- install secure monitor code
- *				- secure kernel initialization for primary and
- *				  and secondary cores
- *				- smc handler for secure kernel services
- *			- initialize the data for secondary core
- *
- ***********************************************************************************/
 #include <common.h>
 #include <command.h>
-int skern_install(u32 addr, u32 dpsc, u32 freq)
+
+static int mon_install(u32 addr, u32 dpsc, u32 freq)
 {
 	int result;
 
@@ -55,10 +41,9 @@ int skern_install(u32 addr, u32 dpsc, u32 freq)
 	return result;
 }
 
-int do_install_skernel(cmd_tbl_t *cmdtp, int flag, int argc,
-			char * const argv[])
+static int do_mon_install(cmd_tbl_t *cmdtp, int flag, int argc,
+			  char * const argv[])
 {
-	/* TODO: dpsc_base has to come from device tree */
 	u32 addr, dpsc_base = 0x1E80000, freq;
 	int     rcode = 0;
 
@@ -69,24 +54,26 @@ int do_install_skernel(cmd_tbl_t *cmdtp, int flag, int argc,
 
 	addr = simple_strtoul(argv[1], NULL, 16);
 
-	printf ("## Starting boot kernel at 0x%08x ...\n", addr);
-	rcode = skern_install(addr, dpsc_base, freq);
-	printf ("## Started boot kernel successfully, freq [%d]\n", freq);
-	return rcode;
+	rcode = mon_install(addr, dpsc_base, freq);
+	printf ("## installed monitor, freq [%d], status %d\n",
+		freq, rcode);
+
+	return 0;
 }
 
-U_BOOT_CMD(
-	install_skernel, 2, 0, do_install_skernel,
-	"Installing boot kernel at 'addr'\n",
-	""
+U_BOOT_CMD(mon_install, 2, 0, do_mon_install,
+	   "Install boot kernel at 'addr'",
+	   ""
 );
 
-void core_spin(void)
+static void core_spin(void)
 {
-	while (1);
+	while (1) {
+		/* forever */;
+	}
 }
 
-int tetris_core_on(int core_id, void *ep)
+int mon_power_on(int core_id, void *ep)
 {
 	int result;
 
@@ -106,7 +93,7 @@ int tetris_core_on(int core_id, void *ep)
 	return  result;
 }
 
-int tetris_core_off(int core_id)
+int mon_power_off(int core_id)
 {
 	int result;
 
@@ -125,7 +112,7 @@ int tetris_core_off(int core_id)
 	return  result;
 }
 
-int do_tetris_power(cmd_tbl_t *cmdtp, int flag, int argc,
+int do_mon_power(cmd_tbl_t *cmdtp, int flag, int argc,
 			char * const argv[])
 {
 	int     rcode = 0, core_id, on;
@@ -138,28 +125,27 @@ int do_tetris_power(cmd_tbl_t *cmdtp, int flag, int argc,
 
 	core_id = simple_strtoul(argv[1], NULL, 16);
 	on = simple_strtoul(argv[2], NULL, 16);
+
 	if (on)
-		rcode = tetris_core_on(core_id, fn);
+		rcode = mon_power_on(core_id, fn);
 	else
-		rcode = tetris_core_off(core_id);
+		rcode = mon_power_off(core_id);
 
 	if (on) {
 		if (!rcode)
 			printf("core %d powered on successfully\n", core_id);
 		else
-			printf("core %d powered on failure\n", core_id);
+			printf("core %d power on failure\n", core_id);
 	} else {
 		printf("core %d powered off successfully\n", core_id);
 	}
 
-	return rcode;
+	return 0;
 }
 
-U_BOOT_CMD(
-	tet_power, 3, 0, do_tetris_power,
-	"Power On/Off Tetris secondary core\n",
-	"tet_power <coreid> <oper>\n"
-	"- coreid (1-3) and oper (1 - ON, 0 - OFF)\n"
-	""
+U_BOOT_CMD(mon_power, 3, 0, do_mon_power,
+	   "Power On/Off secondary core",
+	   "mon_power <coreid> <oper>\n"
+	   "- coreid (1-3) and oper (1 - ON, 0 - OFF)\n"
+	   ""
 );
-
