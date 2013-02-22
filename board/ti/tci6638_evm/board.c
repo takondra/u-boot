@@ -442,10 +442,9 @@ void init_ddremif(u32 base, struct ddr3_emif_config *emif_cfg)
 
 int dram_init(void)
 {
-	gd->ram_size = CONFIG_MAX_RAM_BANK_SIZE;
-
+	gd->ram_size = get_ram_size(CONFIG_SYS_SDRAM_BASE,
+				    CONFIG_MAX_RAM_BANK_SIZE);
 	init_async_emif(ARRAY_SIZE(async_emif_config), async_emif_config);
-
 	return 0;
 }
 
