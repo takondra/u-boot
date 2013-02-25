@@ -214,6 +214,20 @@ struct dplls omap4460_dplls = {
 	.ddr = NULL
 };
 
+struct dplls omap4470_dplls = {
+	.mpu = mpu_dpll_params_1600mhz,
+	.core = core_dpll_params_1600mhz,
+	.per = per_dpll_params_1536mhz,
+	.iva = iva_dpll_params_1862mhz,
+#ifdef CONFIG_SYS_OMAP_ABE_SYSCK
+	.abe = abe_dpll_params_sysclk_196608khz,
+#else
+	.abe = &abe_dpll_params_32k_196608khz,
+#endif
+	.usb = usb_dpll_params_1920mhz,
+	.ddr = NULL
+};
+
 struct pmic_data twl6030_4430es1 = {
 	.base_offset = PHOENIX_SMPS_BASE_VOLT_STD_MODE_UV,
 	.step = 12660, /* 12.66 mV represented in uV */
@@ -275,6 +289,20 @@ struct vcores_data omap4460_volts = {
 
 	.mm.value = 1200,
 	.mm.addr = SMPS_REG_ADDR_VCORE2,
+	.mm.pmic = &twl6030,
+};
+
+struct vcores_data omap4470_volts = {
+	.mpu.value = 1200,
+	.mpu.addr = SMPS_REG_ADDR_SMPS1,
+	.mpu.pmic = &twl6030,
+
+	.core.value = 1126,
+	.core.addr = SMPS_REG_ADDR_SMPS1,
+	.core.pmic = &twl6030,
+
+	.mm.value = 1137,
+	.mm.addr = SMPS_REG_ADDR_SMPS1,
 	.mm.pmic = &twl6030,
 };
 
@@ -483,6 +511,10 @@ void hw_data_init(void)
 	*omap_vcores = &omap4460_volts;
 	break;
 
+	case OMAP4470_ES1_0:
+	*dplls_data = &omap4470_dplls;
+	*omap_vcores = &omap4470_volts;
+	break;
 	default:
 		printf("\n INVALID OMAP REVISION ");
 	}
