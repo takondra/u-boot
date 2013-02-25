@@ -76,6 +76,20 @@ static const struct emif_regs emif_regs_elpida_380_mhz_1cs = {
 	.emif_ddr_phy_ctlr_1		= 0x049ff418
 };
 
+const struct emif_regs emif_regs_elpida_400_mhz_1cs = {
+	.sdram_config_init		= 0x80800eb2,
+	.sdram_config			= 0x80801ab2,
+	.ref_ctrl			= 0x00000618,
+	.sdram_tim1			= 0x10eb0662,
+	.sdram_tim2			= 0x20370dd2,
+	.sdram_tim3			= 0x00b1c33f,
+	.read_idle_ctrl			= 0x000501ff,
+	.zq_config			= 0x500b3215,
+	.temp_alert_config		= 0x58016893,
+	.emif_ddr_phy_ctlr_1_init	= 0x049ffff5,
+	.emif_ddr_phy_ctlr_1		= 0x049ff418
+};
+
 const struct emif_regs emif_regs_elpida_400_mhz_2cs = {
 	.sdram_config_init		= 0x80000eb9,
 	.sdram_config			= 0x80001ab9,
@@ -123,8 +137,10 @@ static void emif_get_reg_dump_sdp(u32 emif_nr, const struct emif_regs **regs)
 		*regs = &emif_regs_elpida_380_mhz_1cs;
 	else if (omap4_rev == OMAP4430_ES2_0)
 		*regs = &emif_regs_elpida_200_mhz_2cs;
-	else
+	else if (omap4_rev < OMAP4470_ES1_0)
 		*regs = &emif_regs_elpida_400_mhz_2cs;
+	else
+		*regs = &emif_regs_elpida_400_mhz_1cs;
 }
 void emif_get_reg_dump(u32 emif_nr, const struct emif_regs **regs)
 	__attribute__((weak, alias("emif_get_reg_dump_sdp")));
