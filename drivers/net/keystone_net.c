@@ -25,7 +25,7 @@
 #include <malloc.h>
 #include <asm/arch/emac_defs.h>
 #include <asm/arch/psc_defs.h>
-#include <asm/arch/cppi_dma.h>
+#include <asm/arch/keystone_nav.h>
 
 unsigned int emac_dbg = 0;
 #define debug_emac(fmt, args...) if (emac_dbg) printf(fmt, ##args)
@@ -37,6 +37,19 @@ unsigned int emac_open = 0;
 #else
 #define emac_gigabit_enable()	/* no gigabit to enable */
 #endif
+
+#define RX_BUFF_NUMS	24
+#define RX_BUFF_LEN	1520
+#define MAX_SIZE_STREAM_BUFFER RX_BUFF_LEN
+
+static u8 rx_buffs[RX_BUFF_NUMS * RX_BUFF_LEN] __attribute__((aligned(16)));
+
+struct rx_buff_desc net_rx_buffs = {
+	.buff_ptr	= rx_buffs,
+	.num_buffs	= RX_BUFF_NUMS,
+	.buff_len	= RX_BUFF_LEN,
+	.rx_flow	= RX_FLOW_NUM,
+};
 
 extern int cpu_to_bus(u32 *ptr, u32 length);
 
@@ -53,8 +66,8 @@ static int marvell_88e1111_get_link_speed(int phy_addr);
 static int marvell_88e1111_auto_negotiate(int phy_addr);
 
 #ifdef CONFIG_SOC_TCI6638
-void SgmiiDefSerdesSetup156p25Mhz();
-void SgmiiDefSerdesShutdown();
+void sgmii_serdes_setup_156p25mhz();
+void sgmii_serdes_shutdown();
 #endif
 
 /* EMAC Addresses */
@@ -411,7 +424,7 @@ int keystone_sgmii_link_status(int port)
 	return 0;
 }
 
-int keystone_get_link_status()
+int keystone_get_link_status(void)
 {
 	int sgmii_interface[DEVICE_N_GMACSL_PORTS] = CONFIG_SYS_SGMII_INTERFACE;
 	int sgmii_link, n;
@@ -532,63 +545,6 @@ int serdes_config()
 }
 #endif 
 
-int32_t cpmac_drv_send(u_int8_t* buffer, int num_bytes)
-{
-	struct qm_host_desc *hd;
-	int i;
-
-	/*
-	 * Must always setup the descriptor to
-	 * have the minimum packet length
-	 */
-	if (num_bytes < EMAC_MIN_ETHERNET_PKT_SIZE)
-		num_bytes = EMAC_MIN_ETHERNET_PKT_SIZE;
-
-	for (i = 0, hd = NULL; hd == NULL; i++, udelay(1000))
-		hd = qm_pop (DEVICE_QM_TX_Q);
-
-	if (hd == NULL)
-		return (-1);
-
-	QM_DESC_DESCINFO_SET_PKT_LEN(hd->desc_info, num_bytes);
-
-	hd->buff_len		= num_bytes;
-	hd->orig_buff_len	= num_bytes;
-	hd->buff_ptr		= (u_int32_t)buffer;
-	hd->orig_buff_ptr	= (u_int32_t)buffer;
-	hd->swinfo2 |= hd->swinfo2 & ~(0x00070000) |
-		((CONFIG_SLAVE_PORT_NUM + 1) << 16);
-
-	/* Return the descriptor back to the transmit queue */
-	QM_DESC_PINFO_SET_QM(hd->packet_info, 0);
-	QM_DESC_PINFO_SET_QUEUE(hd->packet_info, DEVICE_QM_TX_Q);
-
-	qm_push (hd, DEVICE_QM_ETH_TX_Q, QM_DESC_SIZE_BYTES);
-
-	return (0);
-}
-
-void free_queues(void)
-{
-	struct qm_host_desc *hd;
-
-	do {
-		hd = qm_pop(DEVICE_QM_FREE_Q);
-	} while(hd != NULL);
-
-	do {
-		hd = qm_pop(DEVICE_QM_LNK_BUF_Q);
-	} while(hd != NULL);
-
-	do {
-		hd = qm_pop(DEVICE_QM_RCV_Q);
-	} while(hd != NULL);
-
-	do {
-		hd = qm_pop(DEVICE_QM_TX_Q);
-	} while(hd != NULL);
-}
-
 int mac_sl_reset(u32 port)
 {
 	u32 i, v;
@@ -700,6 +656,15 @@ int ethss_stop(void)
 	return (0);
 }
 
+int32_t cpmac_drv_send(u32* buffer, int num_bytes)
+{
+	if (num_bytes < EMAC_MIN_ETHERNET_PKT_SIZE)
+		num_bytes = EMAC_MIN_ETHERNET_PKT_SIZE;
+
+	return netcp_send(buffer, num_bytes,
+			  (CONFIG_SLAVE_PORT_NUM + 1) << 16);
+}
+
 /* Eth device open */
 static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 {
@@ -729,13 +694,15 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 	/* On chip switch configuration */
 	ethss_config (targetGetSwitchCtl(), targetGetSwitchMaxPktSize());
 
-	/* Queue manager configuration */
-	qm_setup ((struct qm_config *)(targetGetQmConfig()));
-	init_queues();
-
-	/* Cpdma configuration. */
-	packet_dma_rx_configure ((struct packet_dma_rx_cfg *)targetGetCpdmaRxConfig());
-	packet_dma_tx_configure ((struct packet_dma_tx_cfg *)targetGetCpdmaTxConfig());
+	/* TODO: add error handling code */
+	if (qm_init()) {
+		printf("ERROR: qm_init()\n");
+		return (-1);
+	}
+	if (netcp_init(&net_rx_buffs)) {
+		printf("ERROR: netcp_init()\n");
+		return (-1);
+	}
 
 	tci6614_eth_set_mac_addr(dev);
 
@@ -781,15 +748,11 @@ void tci6614_eth_close(struct eth_device *dev)
 
 	ethss_stop();
 
-	/* packet dma close */
-	packet_dma_rx_disable((struct packet_dma_rx_cfg *)targetGetCpdmaRxConfig());
-	packet_dma_tx_disable((struct packet_dma_tx_cfg *)targetGetCpdmaTxConfig());
-
-	free_queues();
-	qm_teardown ();
+	netcp_close();
+	qm_close();
 
 #ifndef CONFIG_SOC_TCI6638
-	SgmiiDefSerdesShutdown();
+	sgmii_serdes_shutdown();
 #endif
 #if 0
 	psc_disable_module(TCI66XX_LPSC_CPGMAC);
@@ -838,21 +801,17 @@ static int tci6614_eth_send_packet (struct eth_device *dev,
  */
 static int tci6614_eth_rcv_packet (struct eth_device *dev)
 {
-	struct qm_host_desc *hd;
-	int32_t pkt_size;
+	void *hd;
+	u32  pkt_size;
+	u32  *pkt;
 
-	hd = qm_pop(DEVICE_QM_RCV_Q);
+	hd = netcp_recv(&pkt, &pkt_size);
 	if (hd == NULL)
 		return (0);
 
-	pkt_size = QM_DESC_DESCINFO_GET_PKT_LEN(hd->desc_info);
+	NetReceive ((volatile uchar *)pkt, pkt_size);
 
-	NetReceive ((volatile uchar *)hd->buff_ptr, pkt_size);
-
-	hd->buff_len = hd->orig_buff_len;
-	hd->buff_ptr = hd->orig_buff_ptr;
-
-	qm_push(hd, DEVICE_QM_LNK_BUF_Q, QM_DESC_SIZE_BYTES);
+	netcp_release_rxhd(hd);
 
 	return (pkt_size);
 }
@@ -895,7 +854,7 @@ int tci6614_emac_initialize(void)
 	psc_enable_module(TCI66XX_LPSC_CPGMAC);
 
 #ifdef CONFIG_SOC_TCI6638
-	SgmiiDefSerdesSetup156p25Mhz();
+	sgmii_serdes_setup_156p25mhz();
 #endif
 
 #ifndef CONFIG_SYS_NO_MDIO
@@ -959,7 +918,7 @@ int tci6614_emac_initialize(void)
 #define reg_rmw(addr, value, mask) \
 	writel(((readl(addr) & (~(mask))) | (value) ), (addr))
 
-void SgmiiDefSerdesSetup156p25Mhz()
+void sgmii_serdes_setup_156p25mhz()
 {
 	unsigned int cnt;
 
@@ -1062,7 +1021,7 @@ void SgmiiDefSerdesSetup156p25Mhz()
 	chip_delay(45000);
 }
 
-void SgmiiDefSerdesShutdown()
+void sgmii_serdes_shutdown()
 {
 
 	reg_rmw(0x0232bfe0, 0, 3 << 29 | 3 << 13);
