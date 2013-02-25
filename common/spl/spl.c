@@ -81,7 +81,7 @@ void spl_parse_image_header(const struct image_header *header)
 {
 	u32 header_size = sizeof(struct image_header);
 
-	if (image_get_magic(header) == IH_MAGIC) {
+	if (image_check_magic(header)) {
 		if (spl_image.flags & SPL_COPY_PAYLOAD_ONLY) {
 			/*
 			 * On some system (e.g. powerpc), the load-address and
