@@ -24,6 +24,7 @@
 #include <common.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
+#include <asm/arch/hardware.h>
 
 void chip_configuration_unlock(void)
 {
@@ -37,3 +38,17 @@ int arch_cpu_init(void)
 	icache_enable();
 	return 0;
 }
+
+void reset_cpu(ulong addr)
+{
+	volatile u32* rstctrl = (volatile u32*)	(CLOCK_BASE + 0xe8);
+	u32 tmp;
+
+	tmp = *rstctrl & 0xffff0000;
+	*rstctrl = tmp | 0x5a69;
+
+	*rstctrl &= 0xfffe0000;
+
+	for (;;);
+}
+

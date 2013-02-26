@@ -35,7 +35,7 @@ ifdef CONFIG_SPL_BUILD
 COBJS	+= spl.o
 endif
 
-SOBJS	+= lowlevel_init.o reset.o
+SOBJS	+= lowlevel_init.o
 
 SRCS	:= $(START:.o=.S) $(SOBJS:.o=.S) $(COBJS:.o=.c)
 
