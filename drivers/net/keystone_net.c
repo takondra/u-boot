@@ -704,8 +704,6 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 		return (-1);
 	}
 
-	tci6614_eth_set_mac_addr(dev);
-
 	/*
 	 * Streaming switch configuration. If not present this
 	 * statement is defined to void in target.h.
@@ -843,6 +841,8 @@ int tci6614_emac_initialize(void)
 	dev->write_hwaddr	= tci6614_eth_set_mac_addr;
 
 	eth_register(dev);
+
+	tci6614_eth_set_mac_addr(dev);
 
 #ifdef TCI6614_U_BOOT_MIN
 	psc_disable_module(TCI66XX_LPSC_CPGMAC);
