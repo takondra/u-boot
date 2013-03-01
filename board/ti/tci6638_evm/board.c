@@ -77,13 +77,14 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 #define DDR3_PLL_200(x)	{ DDR3##x##_PLL,4,	1,	2 }
 #define DDR3_PLL_400(x)	{ DDR3##x##_PLL,8,	1,	2 }
 #define DDR3_PLL_800(x)	{ DDR3##x##_PLL,16,	1,	2 }
+#define DDR3_PLL_333(x)	{ DDR3##x##_PLL,20,	1,	6 }
 
 static struct pll_init_data pll_config[] = {
 	CORE_PLL_799,
 	PASS_PLL_1228,
 	TETRIS_PLL_625,
-	DDR3_PLL_200(A),
-	DDR3_PLL_200(B)
+	DDR3_PLL_333(A),
+	DDR3_PLL_333(B)
 };
 
 #ifdef CONFIG_SPL_BOARD_INIT
@@ -129,12 +130,12 @@ static struct ddr3_emif_config ddr3_1333_64 = {
 };
 
 static struct ddr3_emif_config ddr3_1333_32 = {
-	.sdcfg		= 0x62008C62ul,
+	.sdcfg		= 0x62009C62ul,
 	.sdtim1		= 0x125C8044ul,
 	.sdtim2		= 0x00001D29ul,
 	.sdtim3		= 0x32CDFF43ul,
 	.sdtim4		= 0x543F0ADFul,
-	.zqcfg		= 0xF0073200ul,
+	.zqcfg		= 0x70073200ul,
 	.sdrfc		= 0x00001457ul,
 };
 
@@ -476,11 +477,11 @@ int board_early_init_f(void)
 {
 	init_plls(ARRAY_SIZE(pll_config), pll_config);
 
-	init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_200_32);
-	init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_200_32);
+	init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1333_32);
+	init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_32);
 
-	init_ddrphy(TCI6638_DDR3B_DDRPHYC, &ddr3phy_200_64);
-	init_ddremif(TCI6638_DDR3B_EMIF_CTRL_BASE, &ddr3_200_64);
+	init_ddrphy(TCI6638_DDR3B_DDRPHYC, &ddr3phy_1333_64);
+	init_ddremif(TCI6638_DDR3B_EMIF_CTRL_BASE, &ddr3_1333_64);
 
 	return 0;
 }
