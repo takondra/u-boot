@@ -54,6 +54,7 @@ static int marvell_88e1111_auto_negotiate(int phy_addr);
 
 #ifdef CONFIG_SOC_TCI6638
 void SgmiiDefSerdesSetup156p25Mhz();
+void SgmiiDefSerdesShutdown();
 #endif
 
 /* EMAC Addresses */
@@ -787,6 +788,10 @@ void tci6614_eth_close(struct eth_device *dev)
 	free_queues();
 	qm_teardown ();
 
+#ifndef CONFIG_SOC_TCI6638
+	SgmiiDefSerdesShutdown();
+#endif
+
 	psc_disable_module(TCI66XX_LPSC_CPGMAC);
 	psc_disable_module(TCI66XX_LPSC_PA);
 	psc_disable_domain(2);
@@ -1021,10 +1026,17 @@ void SgmiiDefSerdesSetup156p25Mhz()
 	reg_rmw(0x0232a000, 0x00000003, 0x000000FF);
 	reg_rmw(0x0232aa00, 0x0000005F, 0x000000FF);
 
+	/*Bring SerDes out of Reset if SerDes is Shutdown & is in Reset Mode*/
+	reg_rmw(0x0232a010, 0x00000000, 1 << 28);
+
 	/* Enable TX and RX via the LANExCTL_STS 0x0000 + x*4 */
+	reg_rmw(0x02320228, 0x00000000, 1 << 29);
 	writel(0xF800F8C0, 0x0232bfe0);
+	reg_rmw(0x02320428, 0x00000000, 1 << 29);
 	writel(0xF800F8C0, 0x0232bfe4);
+	reg_rmw(0x02320628, 0x00000000, 1 << 29);
 	writel(0xF800F8C0, 0x0232bfe8);
+	reg_rmw(0x02320828, 0x00000000, 1 << 29);
 	writel(0xF800F8C0, 0x0232bfec);
 
 	/*Enable pll via the pll_ctrl 0x0014*/
@@ -1050,5 +1062,20 @@ void SgmiiDefSerdesSetup156p25Mhz()
 	chip_delay(45000);
 }
 
+void SgmiiDefSerdesShutdown()
+{
+
+	reg_rmw(0x0232bfe0, 0, 3 << 29 | 3 << 13);
+	reg_rmw(0x02320228, 1 << 29, 1 << 29);
+	reg_rmw(0x0232bfe4, 0, 3 << 29 | 3 << 13);
+	reg_rmw(0x02320428, 1 << 29, 1 << 29);
+	reg_rmw(0x0232bfe8, 0, 3 << 29 | 3 << 13);
+	reg_rmw(0x02320628, 1 << 29, 1 << 29);
+	reg_rmw(0x0232bfec, 0, 3 << 29 | 3 << 13);
+	reg_rmw(0x02320828, 1 << 29, 1 << 29);
+
+	reg_rmw(0x02320034, 0, 3 << 29);
+	reg_rmw(0x02320010, 1 << 28, 1 << 28);
+}
 #endif
 
