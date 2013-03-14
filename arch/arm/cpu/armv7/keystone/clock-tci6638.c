@@ -78,7 +78,7 @@ static unsigned long pll_freq_get(int pll)
 			prediv = (tmp & 0x3f) + 1;
 			mult = ((tmp >> 6) & 0x1fff) + 1;
 			output_div = ((tmp >> 19) & 0xf) + 1;
-			ret = ret * mult / prediv / output_div;
+			ret = ((ret / prediv) * mult) / output_div;
 		}
 	}
 
