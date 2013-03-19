@@ -32,10 +32,18 @@ void chip_configuration_unlock(void)
 	__raw_writel(KEYSTONE_KICK1_MAGIC, KEYSTONE_KICK1);
 }
 
+void share_all_segments(int priv_id);
+
 int arch_cpu_init(void)
 {
 	chip_configuration_unlock();
 	icache_enable();
+
+#ifdef CONFIG_SOC_TCI6638
+	share_all_segments(8);
+	share_all_segments(9);
+#endif	
+
 	return 0;
 }
 

@@ -211,5 +211,7 @@
 #define DEVICE_PA_CDMA_RX_NUM_FLOWS      32
 #define DEVICE_PA_CDMA_TX_NUM_CHANNELS   9
 
+/* MSMC control */
+#define TCI6638_MSMC_CTRL_BASE		0x0bc00000
 
 #endif /* __ASM_ARCH_HARDWARE_H */
