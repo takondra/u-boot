@@ -203,17 +203,19 @@
 #define CONFIG_BOOTDELAY		3
 #define CONFIG_BOOTFILE			"uImage"
 #define CONFIG_EXTRA_ENV_SETTINGS					\
-	"boot=net\0"							\
+	"boot=ramfs\0"							\
 	"tftp_root=/\0"							\
 	"nfs_root=/export\0"						\
-	"mem_lpae=0\0"							\
+	"mem_lpae=1\0"							\
 	"mem_reserve=512M\0"						\
 	"addr_fdt=0x87000000\0"						\
 	"addr_kern=0x88000000\0"					\
 	"addr_mon=0x0c5f0000\0"						\
 	"addr_uboot=0x87000000\0"					\
+	"addr_fs=0x82000000\0"						\
 	"fdt_high=0xffffffff\0"						\
 	"name_fdt=uImage-keystone-evm.dtb\0"				\
+	"name_fs=rootfs-keystone-evm.cpio.gz\0"					\
 	"name_kern=uImage-keystone-evm.bin\0"				\
 	"name_mon=skern-keystone-evm.bin\0"				\
 	"name_uboot=u-boot-spi-keystone-evm.gph\0"			\
@@ -237,7 +239,15 @@
 	"args_net=setenv bootargs ${bootargs} rootfstype=nfs "		\
 		"root=/dev/nfs rw nfsroot=${serverip}:${nfs_root},"	\
 		"${nfs_options} ip=dhcp\0"				\
-	"nfs_options=v3,tcp,rsize=4096,wsize=4096\0"
+	"nfs_options=v3,tcp,rsize=4096,wsize=4096\0"			\
+	"get_fdt_ramfs=dhcp ${addr_fdt} ${tftp_root}/${name_fdt}\0"	\
+	"get_kern_ramfs=dhcp ${addr_kern} ${tftp_root}/${name_kern}\0"	\
+	"get_mon_ramfs=dhcp ${addr_mon} ${tftp_root}/${name_mon}\0"	\
+	"get_uboot_ramfs=dhcp ${addr_uboot} ${tftp_root}/${name_uboot}\0"\
+	"get_fs_ramfs=dhcp ${addr_fs} ${tftp_root}/${name_fs}\0"	\
+	"init_ramfs=run args_all args_ramfs get_fs_ramfs\0"		\
+	"args_ramfs=setenv bootargs ${bootargs} earlyprintk "		\
+		"rdinit=/sbin/init rw root=/dev/ram0 initrd=0x802000000,9M\0"
 #define CONFIG_BOOTCOMMAND						\
 	"run init_${boot} get_fdt_${boot} get_mon_${boot} "		\
 		"get_kern_${boot} run_mon run_kern"
