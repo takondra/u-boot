@@ -403,7 +403,7 @@ void init_ddrphy(u32 base, struct ddr3_phy_config *phy_cfg)
 	tmp = __raw_readl(base + TCI6638_DDRPHY_PGCR1_OFFSET);
 	tmp &= ~(phy_cfg->pgcr1_mask);
 	tmp |= phy_cfg->pgcr1_val;
-        __raw_writel(tmp, TCI6638_DDRPHY_PGCR1_OFFSET);
+        __raw_writel(tmp, base + TCI6638_DDRPHY_PGCR1_OFFSET);
 
 	__raw_writel(phy_cfg->ptr0,   base + TCI6638_DDRPHY_PTR0_OFFSET);
 	__raw_writel(phy_cfg->ptr1,   base + TCI6638_DDRPHY_PTR1_OFFSET);
