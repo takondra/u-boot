@@ -60,7 +60,7 @@ struct pll_regs {
 
 void init_pll(const struct pll_init_data *data)
 {
-	u32 tmp, tmp_ctl, pllm, plld, pllod, reg[2], bwadj;
+	u32 tmp, tmp_ctl, pllm, plld, pllod, bwadj;
 
 	pllm = data->pll_m - 1;
 	plld = (data->pll_d - 1) & 0x3f;
@@ -207,15 +207,31 @@ void init_pll(const struct pll_init_data *data)
 		tmp = __raw_readl(pll_regs[data->pll].reg1);
 		tmp &= ~(0xf);
 		tmp |= ((bwadj>>8) & 0xf);
+
+		/* set PLL Select (bit 13) for PASS PLL */
+		if (data->pll == PASS_PLL)
+			tmp |= 0x00002000;
+
 		__raw_writel(tmp, pll_regs[data->pll].reg1);
 
-		reg_setbits(pll_regs[data->pll].reg1, 0x00002000);	/* Set RESET bit = 1 */
-		pll_delay (14000); 	/* Wait for a minimum of 7 us*/
-		reg_clrbits(pll_regs[data->pll].reg1, 0x00002000);	/* Clear RESET bit */
-		pll_delay (70000);
+
+		/* Reset bit: bit 14 for both DDR3 & PASS PLL */
+		tmp = 0x00004000;
+#ifdef CONFIG_SOC_TCI6614
+		/* Reset bit: bit 13 for DDR3 PLL */
+		if (data->pll == DDR3_PLL)
+			tmp = 0x00002000;
+#endif
+		/* Set RESET bit = 1 */
+		reg_setbits(pll_regs[data->pll].reg1, tmp);
+		/* Wait for a minimum of 7 us*/
+		pll_delay(14000);
+		/* Clear RESET bit */
+		reg_clrbits(pll_regs[data->pll].reg1, tmp);
+		pll_delay(70000);
 
 		reg_clrbits(pll_regs[data->pll].reg0, 0x00800000); /* clear BYPASS (Enable PLL Mode) */
-		pll_delay (14000);	/* Wait for a minimum of 7 us*/
+		pll_delay(14000);	/* Wait for a minimum of 7 us*/
 	}
 
 	pll_delay (140000);
