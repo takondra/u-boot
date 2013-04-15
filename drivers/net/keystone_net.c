@@ -791,11 +791,11 @@ void tci6614_eth_close(struct eth_device *dev)
 #ifndef CONFIG_SOC_TCI6638
 	SgmiiDefSerdesShutdown();
 #endif
-
+#if 0
 	psc_disable_module(TCI66XX_LPSC_CPGMAC);
 	psc_disable_module(TCI66XX_LPSC_PA);
 	psc_disable_domain(2);
-
+#endif
 	emac_open = 0;
 
 	debug_emac("- emac_close\n");
