@@ -106,7 +106,7 @@ void init_pll(const struct pll_init_data *data)
 		reg_rmw(pll_regs[data->pll].reg0, 0x0007F000, (pllm << 6));
 
 		/* Set the BWADJ     (12 bit field)  */
-		tmp_ctl = ((pllm + 1)>> 1) - 1; /* Divide the pllm by 2 */
+		tmp_ctl = pllm >> 1; /* Divide the pllm by 2 */
 		reg_rmw(pll_regs[data->pll].reg0, 0xFF000000, (tmp_ctl << 24));
 		reg_rmw(pll_regs[data->pll].reg1, 0x0000000F, (tmp_ctl >> 8));
 
@@ -160,7 +160,7 @@ void init_pll(const struct pll_init_data *data)
 	}
 #ifdef CONFIG_SOC_TCI6638
 	else if (data->pll == TETRIS_PLL) {
-		bwadj = ((pllm + 1) >> 1) - 1 ;
+		bwadj = pllm >> 1;
 //1.5 Set PLLCTL0[BYPASS] =1 (enable bypass),
 		reg_setbits(pll_regs[data->pll].reg0,  0x00800000);
 //Set CHIPMISCCTL1[13] = 0 (enable glitchfree bypass) only applicable for Kepler
