@@ -85,7 +85,7 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 
 static struct pll_init_data pll_config[] = {
 	CORE_PLL_799,
-	PASS_PLL_1050,
+	PASS_PLL_983,
 	TETRIS_PLL_625,
 	DDR3_PLL_333(A),
 	DDR3_PLL_333(B)
