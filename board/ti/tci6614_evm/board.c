@@ -27,6 +27,7 @@
 #include <asm/io.h>
 #include <asm/mach-types.h>
 #include <asm/arch/nand_defs.h>
+#include <asm/arch/emac_defs.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -240,7 +241,6 @@ int mpu_enable_user_mode_access(void)
 int board_init(void)
 {
 	unsigned int tmp;
-	char *s;
 
 	gd->bd->bi_arch_number = MACH_TYPE_TCI6614_EVM;
 	gd->bd->bi_boot_params = LINUX_BOOT_PARAM_ADDR;
@@ -288,7 +288,6 @@ int dram_init(void)
 }
 
 #ifdef CONFIG_NAND_DAVINCI
-extern int tci6614_emac_initialize(void);
 int board_nand_init(struct nand_chip *nand)
 {
 	davinci_nand_init(nand);
@@ -298,9 +297,50 @@ int board_nand_init(struct nand_chip *nand)
 #endif
 
 #ifdef CONFIG_DRIVER_TI_KEYSTONE_NET
+eth_priv_t eth_priv_cfg[] = {
+	{
+		.int_name	= "TCI6614_EMAC",
+		.rx_flow	= 22,
+		.phy_addr	= 0,
+		.slave_port	= 1,
+		.sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED,
+	},
+	{
+		.int_name	= "TCI6614_EMAC1",
+		.rx_flow	= 23,
+		.phy_addr	= 1,
+		.slave_port	= 2,
+		.sgmii_link_type = SGMII_LINK_MAC_PHY,
+	},
+};
+
+int get_eth_env_param(char *env_name)
+{
+	char * env;
+	int  res = -1;
+
+	env = getenv(env_name);
+	if (env)
+		res = simple_strtol(env, NULL, 0);
+
+	return res;
+}
+
 int board_eth_init(bd_t *bis)
 {
-	tci6614_emac_initialize();
+	int	res;
+	int	has_mdio = 1; /* has mdio by default */
+
+	if ((res = get_eth_env_param("has_mdio")) >= 0 )
+		has_mdio = res;
+
+	tci6614_emac_set_has_mdio(has_mdio);
+
+	/* use interface with phy */
+	eth_priv_cfg[1].sgmii_link_type = 
+		(has_mdio == 1) ? SGMII_LINK_MAC_PHY : SGMII_LINK_MAC_PHY_FORCED;
+
+	tci6614_emac_initialize(&eth_priv_cfg[1]);
 
 	return 0;
 }

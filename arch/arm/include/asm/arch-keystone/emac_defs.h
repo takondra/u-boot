@@ -52,10 +52,6 @@ typedef enum { FALSE = 0, TRUE = 1 } bool;
 #define EMAC_MDIO_CLOCK_FREQ		1000000		/* 1.0 MHz */
 #endif
 
-/* PHY mask - set only those phy number bits where phy is/can be connected */
-#define EMAC_MDIO_PHY_NUM           CONFIG_EMAC_MDIO_PHY_NUM
-#define EMAC_MDIO_PHY_MASK          (1 << EMAC_MDIO_PHY_NUM)
-
 /* MII Status Register */
 #define MII_STATUS_REG			1
 #define MII_STATUS_LINK_MASK		(0x4)
@@ -373,5 +369,16 @@ typedef struct
 } phy_t;
 
 #define SGMII_ACCESS(port,reg)   *((volatile unsigned int *)(sgmiis[port] + reg))
+
+typedef struct
+{
+	char	int_name[32];
+	int	rx_flow;
+	int	phy_addr;
+	int	slave_port;
+	int	sgmii_link_type;
+} eth_priv_t;
+
+void tci6614_emac_set_has_mdio(int has_mdio);
 
 #endif  /* _EMAC_DEFS_H_ */

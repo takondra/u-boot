@@ -31,11 +31,12 @@ unsigned int emac_dbg = 0;
 #define debug_emac(fmt, args...) if (emac_dbg) printf(fmt, ##args)
 
 unsigned int emac_open = 0;
+static unsigned int sys_has_mdio = 1;
 
 #ifdef TCI6614_EMAC_GIG_ENABLE
-#define emac_gigabit_enable()	tci6614_eth_gigabit_enable()
+#define emac_gigabit_enable(x)	tci6614_eth_gigabit_enable(x)
 #else
-#define emac_gigabit_enable()	/* no gigabit to enable */
+#define emac_gigabit_enable(x)	/* no gigabit to enable */
 #endif
 
 #define RX_BUFF_NUMS	24
@@ -48,7 +49,7 @@ struct rx_buff_desc net_rx_buffs = {
 	.buff_ptr	= rx_buffs,
 	.num_buffs	= RX_BUFF_NUMS,
 	.buff_len	= RX_BUFF_LEN,
-	.rx_flow	= RX_FLOW_NUM,
+	.rx_flow	= 22,
 };
 
 extern int cpu_to_bus(u32 *ptr, u32 length);
@@ -66,16 +67,13 @@ static int marvell_88e1111_get_link_speed(int phy_addr);
 static int marvell_88e1111_auto_negotiate(int phy_addr);
 
 #ifdef CONFIG_SOC_TCI6638
-void sgmii_serdes_setup_156p25mhz();
-void sgmii_serdes_shutdown();
+void sgmii_serdes_setup_156p25mhz(void);
+void sgmii_serdes_shutdown(void);
 #endif
 
 /* EMAC Addresses */
 static volatile emac_regs	*adap_emac = (emac_regs *)EMAC_EMACSL_BASE_ADDR;
 static volatile mdio_regs	*adap_mdio = (mdio_regs *)EMAC_MDIO_BASE_ADDR;
-
-/* PHY address for a discovered PHY (0xff - not found) */
-volatile u_int8_t active_phy_addr = 0xff;
 
 phy_t phy;
 
@@ -86,13 +84,19 @@ static void chip_delay(u32 del)
 	for (i = 0; i < (del / 8); i++);
 }
 
-int tci6614_eth_set_mac_addr(struct eth_device *dev)
+int tci6614_eth_read_mac_addr(struct eth_device *dev)
 {
-	u32 maca, macb;
+	eth_priv_t *eth_priv;
+	u32 maca = 0;
+	u32 macb = 0;
+
+	eth_priv = (eth_priv_t*)dev->priv;
 
 	/* Read the e-fuse mac address */
-	maca = __raw_readl(MAC_ID_BASE_ADDR);
-	macb = __raw_readl(MAC_ID_BASE_ADDR + 4);
+	if (eth_priv->slave_port == 1) {
+		maca = __raw_readl(MAC_ID_BASE_ADDR);
+		macb = __raw_readl(MAC_ID_BASE_ADDR + 4);
+	}
 
 	dev->enetaddr[0] = (macb >>  8) & 0xff;
 	dev->enetaddr[1] = (macb >>  0) & 0xff;
@@ -119,44 +123,6 @@ static void tci6614_eth_mdio_enable(void)
 	while (readl(&adap_mdio->CONTROL) & MDIO_CONTROL_IDLE)
 		;
 }
-
-/*
- * Tries to find an active connected PHY. Returns 1 if address if found.
- * If no active PHY (or more than one PHY) found returns 0.
- * Sets active_phy_addr variable.
- */
-static int tci6614_eth_phy_detect(void)
-{
-	u_int32_t	phy_act_state;
-	int		i;
-	int		ret = -1;
-
-	active_phy_addr = 0xff;
-
-#ifdef CONFIG_SOC_TCI6638
-	udelay(10000);
-#endif
-
-	phy_act_state = readl(&adap_mdio->ALIVE) & EMAC_MDIO_PHY_MASK;
-	if (phy_act_state == 0)
-		return(ret);				/* No active PHYs */
-
-	debug_emac("tci6614_eth_phy_detect(), ALIVE = 0x%08x\n", phy_act_state);
-
-	for (i = 0; i < 32; i++) {
-		if (phy_act_state & (1 << i)) {
-			if (phy_act_state & ~(1 << i))
-				return(ret);		/* More than one PHY */
-			else {
-				active_phy_addr = i;
-				return(0);
-			}
-		}
-	}
-
-	return(ret);	/* Just to make GCC happy */
-}
-
 
 /* Read a PHY register via MDIO inteface. Returns 1 on success, 0 otherwise */
 int tci6614_eth_phy_read(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t *data)
@@ -207,7 +173,7 @@ int tci6614_eth_phy_write(u_int8_t phy_addr, u_int8_t reg_num, u_int16_t data)
 }
 
 /* PHY functions for a generic PHY */
-static int gen_init_phy(int phy_addr)
+static int __attribute__((unused)) gen_init_phy(int phy_addr)
 {
 	int	ret = -1;
 
@@ -219,7 +185,7 @@ static int gen_init_phy(int phy_addr)
 	return(ret);
 }
 
-static int gen_is_phy_connected(int phy_addr)
+static int __attribute__((unused)) gen_is_phy_connected(int phy_addr)
 {
 	u_int16_t	dummy;
 
@@ -238,7 +204,7 @@ static int gen_get_link_speed(int phy_addr)
 	return(-1);
 }
 
-static int gen_auto_negotiate(int phy_addr)
+static int __attribute__((unused)) gen_auto_negotiate(int phy_addr)
 {
 	u_int16_t	tmp;
 
@@ -329,15 +295,15 @@ static int tci6614_mii_phy_write(const char *devname, unsigned char addr,
 }
 #endif
 
-static void  __attribute__((unused)) tci6614_eth_gigabit_enable(void)
+static void  __attribute__((unused)) tci6614_eth_gigabit_enable(u_int8_t phy_addr)
 {
 	u_int16_t data;
 
-#ifndef CONFIG_SYS_NO_MDIO
-	if (tci6614_eth_phy_read(active_phy_addr, 0, &data) ||
-		!(data & (1 << 6))) /* speed selection MSB */
-		return;
-#endif
+	if (sys_has_mdio) {
+		if (tci6614_eth_phy_read(phy_addr, 0, &data) ||
+			!(data & (1 << 6))) /* speed selection MSB */
+			return;
+	}
 
 	/*
 	 * Check if link detected is giga-bit
@@ -418,31 +384,32 @@ int keystone_sgmii_link_status(int port)
 
 	status = __raw_readl(SGMII_STATUS_REG(port));
 
-	if ((status & SGMII_REG_STATUS_LINK) != 0)
-		return 1;
-
-	return 0;
+	return (status & SGMII_REG_STATUS_LINK);
 }
 
-int keystone_get_link_status(void)
-{
-	int sgmii_interface[DEVICE_N_GMACSL_PORTS] = CONFIG_SYS_SGMII_INTERFACE;
-	int sgmii_link, n;
-	int link_state = 0;
 
-	for (n = 0; n < DEVICE_N_GMACSL_PORTS; n++) {
-		sgmii_link = keystone_sgmii_link_status(n);
+int keystone_get_link_status(struct eth_device *dev)
+{
+	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
+	int sgmii_link;
+	int link_state = 0;
+#if CONFIG_GET_LINK_STATUS_ATTEMPTS > 1
+	int j;
+
+	for (j = 0; (j < CONFIG_GET_LINK_STATUS_ATTEMPTS) && (link_state == 0); j++) {
+#endif
+		sgmii_link = keystone_sgmii_link_status(eth_priv->slave_port - 1);
 
 		if (sgmii_link) {
-			link_state |= BIT(n);
+			link_state = 1;
 
-			if (sgmii_interface[n] == SGMII_LINK_MAC_PHY)
-				if (phy.get_link_speed (active_phy_addr))
-					link_state &= ~BIT(n);
-		} else
-			link_state &= ~BIT(n);
+			if (eth_priv->sgmii_link_type == SGMII_LINK_MAC_PHY)
+				if (phy.get_link_speed (eth_priv->phy_addr))
+					link_state = 0;
+		}
+#if CONFIG_GET_LINK_STATUS_ATTEMPTS > 1
 	}
-
+#endif
 	return link_state;
 }
 
@@ -656,29 +623,46 @@ int ethss_stop(void)
 	return (0);
 }
 
-int32_t cpmac_drv_send(u32* buffer, int num_bytes)
+int32_t cpmac_drv_send(u32* buffer, int num_bytes, int slave_port_num)
 {
 	if (num_bytes < EMAC_MIN_ETHERNET_PKT_SIZE)
 		num_bytes = EMAC_MIN_ETHERNET_PKT_SIZE;
 
 	return netcp_send(buffer, num_bytes,
-			  (CONFIG_SLAVE_PORT_NUM + 1) << 16);
+			  (slave_port_num) << 16);
 }
 
+extern eth_priv_t *eth_priv_cfg;
 /* Eth device open */
 static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 {
 	int32_t n;
 	u_int32_t clkdiv;
-	int link, status;
-	int sgmii_interface[DEVICE_N_GMACSL_PORTS] = CONFIG_SYS_SGMII_INTERFACE;
-
-	u_int8_t pkt_buf[EMAC_MIN_ETHERNET_PKT_SIZE];
+	int link;
+#ifndef CONFIG_SOC_TCI6638
+	int status;
+#endif
+	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
 
 	debug_emac("+ emac_open\n");
 
+	net_rx_buffs.rx_flow	= eth_priv->rx_flow;
+
+#ifdef TCI6614_U_BOOT_MIN
+	psc_disable_module(TCI66XX_LPSC_CPGMAC);
+	psc_disable_module(TCI66XX_LPSC_PA);
+	udelay(100);
+#endif
+
 	psc_enable_module(TCI66XX_LPSC_PA);
 	psc_enable_module(TCI66XX_LPSC_CPGMAC);
+
+#ifdef CONFIG_SOC_TCI6638
+	sgmii_serdes_setup_156p25mhz();
+#endif
+
+	if (sys_has_mdio)
+		tci6614_eth_mdio_enable();
 
 #ifndef CONFIG_SOC_TCI6638
 	status = serdes_config();
@@ -686,8 +670,8 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 		return status;
 #endif
 
-	for (n = 0; n < DEVICE_N_GMACSL_PORTS; n++)
-		keystone_sgmii_config(n, sgmii_interface[n]);
+	keystone_sgmii_config(eth_priv->slave_port - 1,
+			      eth_priv->sgmii_link_type);
 
 	udelay(10000);
 
@@ -711,21 +695,21 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 	 */
 	hwConfigStreamingSwitch();
 
-#ifndef CONFIG_SYS_NO_MDIO
-	/* Init MDIO & get link state */
-	clkdiv = (EMAC_MDIO_BUS_FREQ / EMAC_MDIO_CLOCK_FREQ) - 1;
-	writel((clkdiv & 0xff) | MDIO_CONTROL_ENABLE | MDIO_CONTROL_FAULT,
-	       &adap_mdio->CONTROL);
+	if (sys_has_mdio) {
+		/* Init MDIO & get link state */
+		clkdiv = (EMAC_MDIO_BUS_FREQ / EMAC_MDIO_CLOCK_FREQ) - 1;
+		writel((clkdiv & 0xff) | MDIO_CONTROL_ENABLE | MDIO_CONTROL_FAULT,
+		&adap_mdio->CONTROL);
 
-	/* We need to wait for MDIO to start */
-	udelay(1000);
+		/* We need to wait for MDIO to start */
+		udelay(1000);
 
-	link = keystone_get_link_status();
-	if (link == 0)
-		return -1;
-#endif
+		link = keystone_get_link_status(dev);
+		if (link == 0)
+			return -1;
+	}
 
-	emac_gigabit_enable();
+	emac_gigabit_enable(eth_priv->phy_addr);
 
 	ethss_start();
 
@@ -749,7 +733,7 @@ void tci6614_eth_close(struct eth_device *dev)
 	netcp_close();
 	qm_close();
 
-#ifndef CONFIG_SOC_TCI6638
+#ifdef CONFIG_SOC_TCI6638
 	sgmii_serdes_shutdown();
 #endif
 #if 0
@@ -772,24 +756,22 @@ static int tci6614_eth_send_packet (struct eth_device *dev,
 					volatile void *packet, int length)
 {
 	int ret_status = -1;
-	int link;
+	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
 
 	tx_send_loop = 0;
 
-	link = keystone_get_link_status();
-	if (link == 0)
+	if (keystone_get_link_status(dev) == 0)
 		return -1;
 
-	emac_gigabit_enable();
+	emac_gigabit_enable(eth_priv->phy_addr);
 
-	if (cpmac_drv_send ((u_int8_t *) packet, length) != 0)
+	if (cpmac_drv_send ((u32*) packet, length, eth_priv->slave_port) != 0)
 		return ret_status;
 
-	link = keystone_get_link_status();
-	if (link == 0)
+	if (keystone_get_link_status(dev) == 0)
 		return -1;
 
-	emac_gigabit_enable();
+	emac_gigabit_enable(eth_priv->phy_addr);
 
 	return (length);
 }
@@ -814,16 +796,18 @@ static int tci6614_eth_rcv_packet (struct eth_device *dev)
 	return (pkt_size);
 }
 
+void tci6614_emac_set_has_mdio(int has_mdio)
+{
+	sys_has_mdio = has_mdio;
+}
+
 /*
  * This function initializes the EMAC hardware. It does NOT initialize
  * EMAC modules power or pin multiplexors, that is done by board_init()
  * much earlier in bootup process. Returns 1 on success, 0 otherwise.
  */
-int tci6614_emac_initialize(void)
+int tci6614_emac_initialize(eth_priv_t *eth_priv)
 {
-	u_int32_t phy_id;
-	u_int16_t tmp;
-	int i;
 	struct eth_device *dev;
 
 	dev = malloc(sizeof *dev);
@@ -831,85 +815,36 @@ int tci6614_emac_initialize(void)
 		return -1;
 
 	memset(dev, 0, sizeof *dev);
-	sprintf(dev->name, "TCI6614-EMAC");
+
+	strcpy(dev->name, eth_priv->int_name);
+	dev->priv = eth_priv;
+
+	tci6614_eth_read_mac_addr(dev);
 
 	dev->iobase		= 0;
 	dev->init		= tci6614_eth_open;
 	dev->halt		= tci6614_eth_close;
 	dev->send		= tci6614_eth_send_packet;
 	dev->recv		= tci6614_eth_rcv_packet;
-	dev->write_hwaddr	= tci6614_eth_set_mac_addr;
 
 	eth_register(dev);
 
-	tci6614_eth_set_mac_addr(dev);
-
-#ifdef TCI6614_U_BOOT_MIN
-	psc_disable_module(TCI66XX_LPSC_CPGMAC);
-	psc_disable_module(TCI66XX_LPSC_PA);
-	udelay(100);
+	if (sys_has_mdio) {
+#ifdef CONFIG_ETH_PHY_MARVEL_88E1111
+		sprintf(phy.name, "88E1111");
+		phy.init = marvell_88e1111_init_phy;
+		phy.is_phy_connected = marvell_88e1111_is_phy_connected;
+		phy.get_link_speed = marvell_88e1111_get_link_speed;
+		phy.auto_negotiate = marvell_88e1111_auto_negotiate;
+#else
+		sprintf(phy.name, "GENERIC");
+		phy.init = gen_init_phy;
+		phy.is_phy_connected = gen_is_phy_connected;
+		phy.get_link_speed = gen_get_link_speed;
+		phy.auto_negotiate = gen_auto_negotiate;
 #endif
-
-	psc_enable_module(TCI66XX_LPSC_PA);
-	psc_enable_module(TCI66XX_LPSC_CPGMAC);
-
-#ifdef CONFIG_SOC_TCI6638
-	sgmii_serdes_setup_156p25mhz();
-#endif
-
-#ifndef CONFIG_SYS_NO_MDIO
-	tci6614_eth_mdio_enable();
-
-	for (i = 0; i < 256; i++) {
-		if (readl(&adap_mdio->ALIVE))
-			break;
-		udelay(10);
+		miiphy_register(phy.name, tci6614_mii_phy_read, tci6614_mii_phy_write);
 	}
-
-	if (i >= 256) {
-		printf("No ETH PHY detected!!!\n");
-		return(-1);
-	}
-
-	/* Find if a PHY is connected and get it's address */
-	if (tci6614_eth_phy_detect())
-		return(-1);
-
-	/* Get PHY ID and initialize phy_ops for a detected PHY */
-	if (tci6614_eth_phy_read(active_phy_addr, MII_PHYSID1, &tmp)) {
-		active_phy_addr = 0xff;
-		return(-1);
-	}
-
-	phy_id = (tmp << 16) & 0xffff0000;
-
-	if (tci6614_eth_phy_read(active_phy_addr, MII_PHYSID2, &tmp)) {
-		active_phy_addr = 0xff;
-		return(-1);
-	}
-
-	phy_id |= tmp & 0x0000fff0; /* Ignore the revision number, bit[3:0] */
-
-	switch (phy_id) {
-		case PHY_MARVELL_88E1111:
-			sprintf(phy.name, "88E1111 @ 0x%02x", active_phy_addr);
-			phy.init = marvell_88e1111_init_phy;
-			phy.is_phy_connected = marvell_88e1111_is_phy_connected;
-			phy.get_link_speed = marvell_88e1111_get_link_speed;
-			phy.auto_negotiate = marvell_88e1111_auto_negotiate;
-			break;
-		default:
-			sprintf(phy.name, "GENERIC @ 0x%02x", active_phy_addr);
-			phy.init = gen_init_phy;
-			phy.is_phy_connected = gen_is_phy_connected;
-			phy.get_link_speed = gen_get_link_speed;
-			phy.auto_negotiate = gen_auto_negotiate;
-	}
-
-	printf("Ethernet PHY: %s\n", phy.name);
-
-	miiphy_register(phy.name, tci6614_mii_phy_read, tci6614_mii_phy_write);
-#endif
 
 	return(0);
 }

@@ -115,9 +115,9 @@
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS	20
 
 /* Network Configuration */
-#define CONFIG_SLAVE_PORT_NUM		0
+#define CONFIG_ETH_PHY_MARVEL_88E1111
+
 #define CONFIG_DRIVER_TI_KEYSTONE_NET
-#define CONFIG_EMAC_MDIO_PHY_NUM	CONFIG_SLAVE_PORT_NUM
 #define CONFIG_MII
 #define CONFIG_BOOTP_DEFAULT
 #define CONFIG_BOOTP_DNS
@@ -125,16 +125,8 @@
 #define CONFIG_BOOTP_SEND_HOSTNAME
 #define CONFIG_NET_RETRY_COUNT		32
 #define CONFIG_NET_MULTI
-#define RX_FLOW_NUM			(22 + CONFIG_SLAVE_PORT_NUM)
-#define SGMII_FIXED_OPTION
-#ifdef SGMII_FIXED_OPTION
-#define CONFIG_SYS_SGMII_INTERFACE	{ SGMII_LINK_MAC_PHY_FORCED, \
-					  SGMII_LINK_MAC_PHY_FORCED }
-#define CONFIG_SYS_NO_MDIO
-#else
-#define CONFIG_SYS_SGMII_INTERFACE	{ SGMII_LINK_MAC_PHY, \
-					  SGMII_LINK_MAC_PHY}
-#endif
+#define CONFIG_GET_LINK_STATUS_ATTEMPTS 5
+
 #define CONFIG_SYS_SGMII_REFCLK_MHZ	312
 #define CONFIG_SYS_SGMII_LINERATE_MHZ	1250
 #define	CONFIG_SYS_SGMII_RATESCALE	2
@@ -222,7 +214,8 @@
 	"addr_fs=0x82000000\0"						\
 	"fdt_high=0xffffffff\0"						\
 	"name_fdt=uImage-k2hk-evm.dtb\0"				\
-	"name_fs=rootfs-keystone-evm.cpio.gz\0"					\
+	"has_mdio=0\0"							\
+	"name_fs=rootfs-keystone-evm.cpio.gz\0"				\
 	"name_kern=uImage-keystone-evm.bin\0"				\
 	"name_mon=skern-keystone-evm.bin\0"				\
 	"name_uboot=u-boot-spi-keystone-evm.gph\0"			\
