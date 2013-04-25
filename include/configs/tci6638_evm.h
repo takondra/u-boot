@@ -221,7 +221,7 @@
 	"addr_uboot=0x87000000\0"					\
 	"addr_fs=0x82000000\0"						\
 	"fdt_high=0xffffffff\0"						\
-	"name_fdt=uImage-keystone-evm.dtb\0"				\
+	"name_fdt=uImage-tci6638-evm.dtb\0"				\
 	"name_fs=rootfs-keystone-evm.cpio.gz\0"					\
 	"name_kern=uImage-keystone-evm.bin\0"				\
 	"name_mon=skern-keystone-evm.bin\0"				\
