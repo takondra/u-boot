@@ -733,10 +733,10 @@ void tci6614_eth_close(struct eth_device *dev)
 	netcp_close();
 	qm_close();
 
-#ifdef CONFIG_SOC_TCI6638
-	sgmii_serdes_shutdown();
-#endif
 #if 0
+#ifdef CONFIG_SOC_TCI6638
+ 	sgmii_serdes_shutdown();
+#endif
 	psc_disable_module(TCI66XX_LPSC_CPGMAC);
 	psc_disable_module(TCI66XX_LPSC_PA);
 	psc_disable_domain(2);
