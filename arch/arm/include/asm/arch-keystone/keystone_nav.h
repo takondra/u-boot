@@ -138,7 +138,7 @@ void	queue_close(u32 qnum);
 
 #define CPDMA_CHAN_A_ENABLE ((u32)1 << 31)
 #define CPDMA_CHAN_A_TDOWN  (1 << 30)
-#define TDOWN_TIMEOUT_COUNT	1000
+#define TDOWN_TIMEOUT_COUNT	100
 
 struct global_ctl_regs {
 	u32	revision;
