@@ -45,7 +45,7 @@ struct qm_config tci6614_qm_memmap = {
 	.pdsp_cmd	= 0x02ab8000,
 	.pdsp_ctl	= 0x02a6e000,
 	.pdsp_iram	= 0x02a60000,
-	.qpool_num	= 910,
+	.qpool_num	= 4000,
 };
 
 struct qm_config tci6638_qm_memmap = {
@@ -62,7 +62,7 @@ struct qm_config tci6638_qm_memmap = {
 	.pdsp_cmd	= 0x02a20000,
 	.pdsp_ctl	= 0x02a0f000,
 	.pdsp_iram	= 0x02a10000,
-	.qpool_num	= 910,
+	.qpool_num	= 4000,
 };
 
 /*
@@ -214,8 +214,8 @@ struct pktdma_cfg tci6614_netcp_pktdma = {
 	.rx_flows	= (struct rx_flow_regs*)0x02005000,
 	.rx_flow_num	= 32,
 
-	.rx_free_q	= 911,
-	.rx_rcv_q	= 912,
+	.rx_free_q	= 4001,
+	.rx_rcv_q	= 4002,
 	.tx_snd_q	= 648,
 };
 
@@ -229,8 +229,8 @@ struct pktdma_cfg tci6638_netcp_pktdma = {
 	.rx_flows	= (struct rx_flow_regs*)0x02005000,
 	.rx_flow_num	= 32,
 
-	.rx_free_q	= 911,
-	.rx_rcv_q	= 912,
+	.rx_free_q	= 4001,
+	.rx_rcv_q	= 4002,
 	.tx_snd_q	= 648,
 };
 
