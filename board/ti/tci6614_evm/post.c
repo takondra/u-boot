@@ -34,7 +34,7 @@
 #include <spi_flash.h>
 #include <asm/arch/nand_defs.h>
 #include <asm/arch/emac_defs.h>
-#include <asm/arch/cppi_dma.h>
+#include <asm/arch/keystone_nav.h>
 #include "post.h"
 
 /* The linking RAM */
@@ -462,6 +462,7 @@ int Init_MAC (uint32_t port, uint8_t* macAddress, uint32_t mtu)
     return 0;
 }
 
+#if 0
 /******************************************************************************
  * Function:    post_test_emac_loopback
  ******************************************************************************/
@@ -545,13 +546,14 @@ post_test_emac_loopback
     hd->buff_len = hd->orig_buff_len;
     hd->buff_ptr = hd->orig_buff_ptr;
 
-    qm_push (hd, DEVICE_QM_LNK_BUF_Q, QM_DESC_SIZE_BYTES);
+    qm_push (hd, DEVICE_QM_LNK_BUF_Q);
 
 	emac_open = 1;
 	tci6614_eth_close(&dev);
 
     return POST_TEST_RESULT_PASSED;
 }
+#endif
 
 void
 post_hex_to_string
@@ -888,12 +890,14 @@ tci6614_post
     post_display_status(POST_TEST_NAND, test_result);
 
     post_display_status(POST_TEST_EMAC_LOOPBACK, POST_TEST_RESULT_STARTED);
+#if 0
     test_result = post_test_emac_loopback();
     if (test_result == POST_TEST_RESULT_FAILED)
     {
     	acc_fail++;
     }
     post_display_status(POST_TEST_EMAC_LOOPBACK, test_result);
+#endif
 
     post_display_status(POST_TEST_DDR, POST_TEST_RESULT_STARTED);
     test_result = post_test_external_memory();

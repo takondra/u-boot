@@ -190,10 +190,10 @@ static char post_status[POST_MAX_TEST_NUM][POST_STATUS_MAX_NUM_CHAR] =
 #define PLATFORM_INFO_BOARD_NAME     "TMDXEVMTCI6614"
 
 extern int ddr_memory_test (u32 start_address, u32 end_address, int quick);
-
+#if 0 
 extern void tci6614_eth_close(struct eth_device *dev);
 extern struct qm_host_desc *qm_pop (u_int32_t qnum);
-extern void qm_push (struct qm_host_desc *hd, u_int32_t qnum, u_int32_t descrSize);
+extern void qm_push(struct qm_host_desc *hd, u32 qnum);
 extern int qm_setup (struct qm_config *cfg);
 extern void *targetGetQmConfig (void);
 extern void init_queues(void);
@@ -208,5 +208,6 @@ extern u_int8_t	active_phy_addr;
 extern void serdes_config(void);
 extern int mac_sl_reset(u32 port);
 extern int ethss_config(u32 ctl, u32 max_pkt_size);
+#endif
 
 #endif  /* _POST_H_ */
