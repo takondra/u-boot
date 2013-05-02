@@ -295,12 +295,14 @@ static int tci6614_mii_phy_write(const char *devname, unsigned char addr,
 }
 #endif
 
-static void  __attribute__((unused)) tci6614_eth_gigabit_enable(u_int8_t phy_addr)
+static void  __attribute__((unused)) 
+	tci6614_eth_gigabit_enable(struct eth_device *dev)
 {
 	u_int16_t data;
+	eth_priv_t *eth_priv = (eth_priv_t*)dev->priv;
 
 	if (sys_has_mdio) {
-		if (tci6614_eth_phy_read(phy_addr, 0, &data) ||
+		if (tci6614_eth_phy_read(eth_priv->phy_addr, 0, &data) ||
 			!(data & (1 << 6))) /* speed selection MSB */
 			return;
 	}
@@ -309,8 +311,9 @@ static void  __attribute__((unused)) tci6614_eth_gigabit_enable(u_int8_t phy_add
 	 * Check if link detected is giga-bit
 	 * If Gigabit mode detected, enable gigbit in MAC
 	 */
-	writel(readl(&adap_emac->MACCONTROL) | EMAC_MACCONTROL_GIGFORCE |
-		EMAC_MACCONTROL_GIGABIT_ENABLE, &adap_emac->MACCONTROL);
+	writel(readl(&(adap_emac[eth_priv->slave_port - 1].MACCONTROL)) |
+	        EMAC_MACCONTROL_GIGFORCE | EMAC_MACCONTROL_GIGABIT_ENABLE, 
+		&(adap_emac[eth_priv->slave_port - 1].MACCONTROL));
 }
 
 #ifndef CONFIG_SOC_TCI6638
@@ -709,7 +712,7 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 			return -1;
 	}
 
-	emac_gigabit_enable(eth_priv->phy_addr);
+	emac_gigabit_enable(dev);
 
 	ethss_start();
 
@@ -763,7 +766,7 @@ static int tci6614_eth_send_packet (struct eth_device *dev,
 	if (keystone_get_link_status(dev) == 0)
 		return -1;
 
-	emac_gigabit_enable(eth_priv->phy_addr);
+	emac_gigabit_enable(dev);
 
 	if (cpmac_drv_send ((u32*) packet, length, eth_priv->slave_port) != 0)
 		return ret_status;
@@ -771,7 +774,7 @@ static int tci6614_eth_send_packet (struct eth_device *dev,
 	if (keystone_get_link_status(dev) == 0)
 		return -1;
 
-	emac_gigabit_enable(eth_priv->phy_addr);
+	emac_gigabit_enable(dev);
 
 	return (length);
 }
