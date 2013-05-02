@@ -27,6 +27,7 @@ LIB	:= $(obj)libi2c.o
 
 COBJS-$(CONFIG_BFIN_TWI_I2C) += bfin-twi_i2c.o
 COBJS-$(CONFIG_DRIVER_DAVINCI_I2C) += davinci_i2c.o
+COBJS-$(CONFIG_DRIVER_KEYSTONE_I2C) += keystone_i2c.o
 COBJS-$(CONFIG_DW_I2C) += designware_i2c.o
 COBJS-$(CONFIG_FSL_I2C) += fsl_i2c.o
 COBJS-$(CONFIG_I2C_MVTWSI) += mvtwsi.o

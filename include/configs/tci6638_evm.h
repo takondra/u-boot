@@ -104,9 +104,11 @@
 
 /* I2C Configuration */
 #define CONFIG_HARD_I2C
-#define CONFIG_DRIVER_DAVINCI_I2C
+#define CONFIG_DRIVER_KEYSTONE_I2C
 #define CONFIG_SYS_I2C_SPEED		100000
 #define CONFIG_SYS_I2C_SLAVE		0x10	/* SMBus host address */
+#define CONFIG_I2C_MULTI_BUS		1
+#define I2C_BUS_MAX			3
 
 /* EEPROM definitions */
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN		2
