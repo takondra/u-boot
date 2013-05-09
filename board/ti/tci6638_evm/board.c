@@ -597,3 +597,11 @@ void ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_memory_banks(blob, start, size, CONFIG_NR_DRAM_BANKS);
 }
 #endif
+
+void enable_caches(void)
+{
+#ifndef CONFIG_SYS_DCACHE_OFF
+	/* Enable D-cache. I-cache is already enabled in start.S */
+	dcache_enable();
+#endif
+}
