@@ -812,6 +812,7 @@ void tci6614_emac_set_has_mdio(int has_mdio)
 int tci6614_emac_initialize(eth_priv_t *eth_priv)
 {
 	struct eth_device *dev;
+	static int phy_registered = 0;
 
 	dev = malloc(sizeof *dev);
 	if (dev == NULL)
@@ -832,7 +833,8 @@ int tci6614_emac_initialize(eth_priv_t *eth_priv)
 
 	eth_register(dev);
 
-	if (sys_has_mdio) {
+	if (sys_has_mdio && !phy_registered) {
+		phy_registered = 1;
 #ifdef CONFIG_ETH_PHY_MARVEL_88E1111
 		sprintf(phy.name, "88E1111");
 		phy.init = marvell_88e1111_init_phy;
