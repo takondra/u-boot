@@ -675,6 +675,13 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	post_run(NULL, POST_RAM | post_bootmode_get(0));
 #endif
 
+#ifdef CONFIG_TCI6614_EVM
+	tci6614_post();
+#endif
+#ifdef CONFIG_TCI6638_EVM
+	tci6638_post();
+#endif
+
 #if defined(CONFIG_PRAM) || defined(CONFIG_LOGBUFFER)
 	/*
 	 * Export available size of memory for Linux,

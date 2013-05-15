@@ -111,10 +111,12 @@
 #define I2C_BUS_MAX			3
 
 /* EEPROM definitions */
+#define CONFIG_SYS_I2C_MULTI_EEPROMS
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN		2
 #define CONFIG_SYS_I2C_EEPROM_ADDR		0x50
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_BITS	6
 #define CONFIG_SYS_EEPROM_PAGE_WRITE_DELAY_MS	20
+#define CONFIG_ENV_EEPROM_IS_ON_I2C
 
 /* Network Configuration */
 #define CONFIG_ETH_PHY_MARVEL_88E1111
@@ -186,6 +188,7 @@
 #define CONFIG_CMD_USB
 #define CONFIG_CMD_FAT
 #define CONFIG_CMD_SF
+#define CONFIG_CMD_EEPROM
 
 /* U-Boot general configuration */
 #define CONFIG_SYS_PROMPT		"TCI6638 EVM # "
