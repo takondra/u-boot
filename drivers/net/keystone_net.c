@@ -749,6 +749,14 @@ void tci6614_eth_close(struct eth_device *dev)
 	debug_emac("- emac_close\n");
 }
 
+#ifdef CONFIG_SOC_TCI6638
+void tci6638_eth_open_close(struct eth_device *dev)
+{
+	tci6614_eth_open(dev, NULL);
+	tci6614_eth_close(dev);
+}
+#endif
+
 static int tx_send_loop = 0;
 
 /*
@@ -830,7 +838,7 @@ int tci6614_emac_initialize(eth_priv_t *eth_priv)
 	dev->halt		= tci6614_eth_close;
 	dev->send		= tci6614_eth_send_packet;
 	dev->recv		= tci6614_eth_rcv_packet;
-
+	eth_priv->dev		= dev;
 	eth_register(dev);
 
 	if (sys_has_mdio && !phy_registered) {

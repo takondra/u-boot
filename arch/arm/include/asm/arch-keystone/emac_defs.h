@@ -377,6 +377,7 @@ typedef struct
 	int	phy_addr;
 	int	slave_port;
 	int	sgmii_link_type;
+	struct	eth_device *dev;
 } eth_priv_t;
 
 void tci6614_emac_set_has_mdio(int has_mdio);

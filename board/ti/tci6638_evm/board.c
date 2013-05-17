@@ -514,6 +514,10 @@ int board_eth_init(bd_t *bis)
 		tci6614_emac_initialize(&eth_priv_cfg[j]);
 	}
 
+#ifdef CONFIG_SOC_TCI6638
+	tci6638_eth_open_close(eth_priv_cfg[0].dev);
+#endif
+
 	return 0;
 }
 #endif
