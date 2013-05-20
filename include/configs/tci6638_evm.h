@@ -220,7 +220,7 @@
 	"fdt_high=0xffffffff\0"						\
 	"name_fdt=uImage-k2hk-evm.dtb\0"				\
 	"has_mdio=0\0"							\
-	"name_fs=rootfs-keystone-evm.cpio.gz\0"				\
+	"name_fs=arago-console-image.cpio.gz\0"				\
 	"name_kern=uImage-keystone-evm.bin\0"				\
 	"name_mon=skern-keystone-evm.bin\0"				\
 	"name_uboot=u-boot-spi-keystone-evm.gph\0"			\
