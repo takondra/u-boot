@@ -164,7 +164,7 @@ void init_pll(const struct pll_init_data *data)
 //1.5 Set PLLCTL0[BYPASS] =1 (enable bypass),
 		reg_setbits(pll_regs[data->pll].reg0,  0x00800000);
 //Set CHIPMISCCTL1[13] = 0 (enable glitchfree bypass) only applicable for Kepler
-		reg_clrbits( 0x02620704, (1<<13));
+		reg_clrbits( 0x02620c7c, (1<<13));
 //2 In PLLCTL1, write PLLRST = 1 (PLL is reset)
 		reg_setbits(pll_regs[data->pll].reg1 , (1<<14));
 //3 Program PLLM and PLLD in PLLCTL0 register
