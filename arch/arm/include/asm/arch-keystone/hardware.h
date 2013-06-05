@@ -30,6 +30,7 @@
 #ifndef __ASSEMBLY__
 
 #include <asm/sizes.h>
+#include <asm/io.h>
 
 #define	REG(addr)	(*(volatile unsigned int *)(addr))
 #define REG_P(addr)	((volatile unsigned int *)(addr))
@@ -109,6 +110,32 @@ struct ddr3_emif_config {
 
 #ifdef CONFIG_SOC_TCI6638
 #include <asm/arch/hardware-tci6638.h>
+#endif
+
+#ifndef __ASSEMBLY__
+static inline int cpu_is_tci6614(void)
+{
+	unsigned int jtag_id	= __raw_readl(JTAG_ID_REG);
+	unsigned int part_no	= (jtag_id >> 12) & 0xffff;
+
+	return ((part_no == 0xb962) ? 1 : 0);
+}
+
+static inline int cpu_is_tci6638(void)
+{
+	unsigned int jtag_id	= __raw_readl(JTAG_ID_REG);
+	unsigned int part_no	= (jtag_id >> 12) & 0xffff;
+
+	return ((part_no == 0xb981) ? 1 : 0);
+}
+
+static inline int cpu_revision(void)
+{
+	unsigned int jtag_id	= __raw_readl(JTAG_ID_REG);
+	unsigned int rev	= (jtag_id >> 28) & 0xf;
+
+	return rev;
+}
 #endif
 
 #endif /* __ASM_ARCH_HARDWARE_H */
