@@ -58,7 +58,7 @@ endif
 endif
 
 ifdef CONFIG_CMD_FASTBOOT
-COBJS-y += f_fastboot.o u_fastboot.o
+COBJS-y += f_fastboot.o u_fastboot.o u_fastboot_mmc.o
 COBJS-y += epautoconf.o usbstring.o
 endif
 
