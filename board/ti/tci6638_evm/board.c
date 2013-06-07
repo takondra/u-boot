@@ -80,17 +80,26 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 #define TETRIS_PLL_875  { TETRIS_PLL,	14,	1,	2 }
 #define TETRIS_PLL_1375 { TETRIS_PLL,	22,	2,	1 }
 #define DDR3_PLL_200(x)	{ DDR3##x##_PLL,4,	1,	2 }
-#define DDR3_PLL_400(x)	{ DDR3##x##_PLL,8,	1,	2 }
+#define DDR3_PLL_400(x)	{ DDR3##x##_PLL,16,	1,	4 }
 #define DDR3_PLL_800(x)	{ DDR3##x##_PLL,16,	1,	2 }
 #define DDR3_PLL_333(x)	{ DDR3##x##_PLL,20,	1,	6 }
 
-static struct pll_init_data pll_config[] = {
+static struct pll_init_data pll_config_pg10[] = {
 	CORE_PLL_799,
 	PASS_PLL_983,
 	TETRIS_PLL_625,
 	DDR3_PLL_333(A),
 	DDR3_PLL_333(B)
 };
+
+static struct pll_init_data pll_config_pg11[] = {
+	CORE_PLL_799,
+	PASS_PLL_983,
+	TETRIS_PLL_625,
+	DDR3_PLL_400(A),
+	DDR3_PLL_333(B)
+};
+
 
 #ifdef CONFIG_SPL_BOARD_INIT
 static struct pll_init_data spl_pll_config[] = {
@@ -105,6 +114,16 @@ void spl_init_keystone_plls(void)
 #endif
 
 static struct ddr3_emif_config ddr3_1600_64 = {
+	.sdcfg		= 0x6200CE62ul,
+	.sdtim1		= 0x16709C55ul,
+	.sdtim2		= 0x00001D4Aul,
+	.sdtim3		= 0x435DFF54ul,
+	.sdtim4		= 0x553F0CFFul,
+	.zqcfg		= 0xF0073200ul,
+	.sdrfc		= 0x00001869ul,
+};
+
+static struct ddr3_emif_config ddr3_1600_64A = {
 	.sdcfg		= 0x6200CE62ul,
 	.sdtim1		= 0x16709C55ul,
 	.sdtim2		= 0x00001D4Aul,
@@ -210,6 +229,31 @@ static struct ddr3_phy_config ddr3phy_1600_64 = {
 	.pir_v2		= 0x0000FF81ul,
 };
 
+static struct ddr3_phy_config ddr3phy_1600_64A = {
+	.pllcr		= 0x0001C000ul,
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
+	.ptr0		= 0x42C21590ul,
+	.ptr1		= 0xD05612C0ul,
+	.ptr2		= 0, /* not set in gel */
+	.ptr3		= 0x0D861A80ul,
+	.ptr4		= 0x0C827100ul,
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK | UDIMM_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27) | (1 << 29)),
+	.dtpr0		= 0xA19DBB66ul,
+	.dtpr1		= 0x12868300ul,
+	.dtpr2		= 0x50035200ul,
+	.mr0		= 0x00001C70ul,
+	.mr1		= 0x00000006ul,
+	.mr2		= 0x00000018ul,
+	.dtcr		= 0x710035C7ul,
+	.pgcr2		= 0x00F07A12ul,
+	.zq0cr1		= 0x0000005Dul,
+	.zq1cr1		= 0x0000005Bul,
+	.zq2cr1		= 0x0000005Bul,
+	.pir_v1		= 0x00000033ul,
+	.pir_v2		= 0x0000FF81ul,
+};
 static struct ddr3_phy_config ddr3phy_1600_32 = {
 	.pllcr		= 0x0001C000ul,
 	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
@@ -537,10 +581,18 @@ int cpu_to_bus(u32 *ptr, u32 length)
 #if defined(CONFIG_BOARD_EARLY_INIT_F)
 int board_early_init_f(void)
 {
-	init_plls(ARRAY_SIZE(pll_config), pll_config);
+	if (cpu_revision() > 0) {
+		init_plls(ARRAY_SIZE(pll_config_pg11), pll_config_pg11);
 
-	init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1333_32);
-	init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_32);
+		init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1600_64A);
+		init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_64A);
+	}
+	else {
+		init_plls(ARRAY_SIZE(pll_config_pg10), pll_config_pg10);
+
+		init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1333_32);
+		init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_32);
+	}
 
 	init_ddrphy(TCI6638_DDR3B_DDRPHYC, &ddr3phy_1333_64);
 	init_ddremif(TCI6638_DDR3B_EMIF_CTRL_BASE, &ddr3_1333_64);
