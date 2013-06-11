@@ -156,7 +156,7 @@
 #define MTDIDS_DEFAULT			"nand0=davinci_nand.0"
 #define PART_BOOT			"1024k(bootloader)ro,"
 #define PART_PARAMS			"512k(params)ro,"
-#define PART_UBI			"-(ubi)"
+#define PART_UBI			"-(ubifs)"
 #define MTDPARTS_DEFAULT		"mtdparts=davinci_nand.0:"	\
 					PART_BOOT PART_PARAMS PART_UBI
 
@@ -217,6 +217,7 @@
 	"addr_mon=0x0c5f0000\0"						\
 	"addr_uboot=0x87000000\0"					\
 	"addr_fs=0x82000000\0"						\
+	"addr_ubi=0x82000000\0"						\
 	"fdt_high=0xffffffff\0"						\
 	"name_fdt=uImage-k2hk-evm.dtb\0"				\
 	"has_mdio=0\0"							\
@@ -224,6 +225,7 @@
 	"name_kern=uImage-keystone-evm.bin\0"				\
 	"name_mon=skern-keystone-evm.bin\0"				\
 	"name_uboot=u-boot-spi-keystone-evm.gph\0"			\
+	"name_ubi=keystone-evm-ubifs.ubi\0"				\
 	"run_mon=mon_install ${addr_mon}\0"				\
 	"run_kern=bootm ${addr_kern} - ${addr_fdt}\0"			\
 	"init_net=run args_all args_net\0"				\
@@ -248,11 +250,17 @@
 	"get_fdt_ramfs=dhcp ${addr_fdt} ${tftp_root}/${name_fdt}\0"	\
 	"get_kern_ramfs=dhcp ${addr_kern} ${tftp_root}/${name_kern}\0"	\
 	"get_mon_ramfs=dhcp ${addr_mon} ${tftp_root}/${name_mon}\0"	\
-	"get_uboot_ramfs=dhcp ${addr_uboot} ${tftp_root}/${name_uboot}\0"\
 	"get_fs_ramfs=dhcp ${addr_fs} ${tftp_root}/${name_fs}\0"	\
+	"get_ubi_net=dhcp ${addr_ubi} ${tftp_root}/${name_ubi}\0"	\
+	"burn_ubi=nand erase.part ubifs; "				\
+		"nand write ${addr_ubi} ubifs ${filesize}\0"		\
 	"init_ramfs=run args_all args_ramfs get_fs_ramfs\0"		\
 	"args_ramfs=setenv bootargs ${bootargs} earlyprintk "		\
-		"rdinit=/sbin/init rw root=/dev/ram0 initrd=0x802000000,9M\0"
+		"rdinit=/sbin/init rw root=/dev/ram0 "			\
+		"initrd=0x802000000,9M\0"				\
+	"no_post=1\0"							\
+	"mtdparts=mtdparts=davinci_nand.0:"				\
+		"1024k(bootloader)ro,512k(params)ro,129536k(ubifs)\0"
 #define CONFIG_BOOTCOMMAND						\
 	"run init_${boot} get_fdt_${boot} get_mon_${boot} "		\
 		"get_kern_${boot} run_mon run_kern"
