@@ -68,6 +68,7 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 
 #define CORE_PLL_799	{ CORE_PLL,	13,	1,	2 }
 #define CORE_PLL_983	{ CORE_PLL,	16,	1,	2 }
+#define CORE_PLL_1167	{ CORE_PLL,	19,	1,	2 }
 #define CORE_PLL_1228	{ CORE_PLL,	20,	1,	2 }
 #define PASS_PLL_1228	{ PASS_PLL,	20,	1,	2 }
 #define PASS_PLL_983	{ PASS_PLL,	16,	1,	2 }
@@ -78,6 +79,7 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 #define TETRIS_PLL_625  { TETRIS_PLL,	10,	1,	2 }
 #define TETRIS_PLL_812  { TETRIS_PLL,	13,	1,	2 }
 #define TETRIS_PLL_875  { TETRIS_PLL,	14,	1,	2 }
+#define TETRIS_PLL_1188 { TETRIS_PLL,	19,	2,	1 }
 #define TETRIS_PLL_1375 { TETRIS_PLL,	22,	2,	1 }
 #define DDR3_PLL_200(x)	{ DDR3##x##_PLL,4,	1,	2 }
 #define DDR3_PLL_400(x)	{ DDR3##x##_PLL,16,	1,	4 }
@@ -85,17 +87,17 @@ static struct async_emif_config async_emif_config[ASYNC_EMIF_NUM_CS] = {
 #define DDR3_PLL_333(x)	{ DDR3##x##_PLL,20,	1,	6 }
 
 static struct pll_init_data pll_config_pg10[] = {
-	CORE_PLL_799,
+	CORE_PLL_1167,
 	PASS_PLL_983,
-	TETRIS_PLL_625,
+	TETRIS_PLL_1188,
 	DDR3_PLL_333(A),
 	DDR3_PLL_333(B)
 };
 
 static struct pll_init_data pll_config_pg11[] = {
-	CORE_PLL_799,
+	CORE_PLL_1167,
 	PASS_PLL_983,
-	TETRIS_PLL_625,
+	TETRIS_PLL_1188,
 	DDR3_PLL_400(A),
 	DDR3_PLL_333(B)
 };
