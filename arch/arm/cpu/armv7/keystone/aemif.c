@@ -93,6 +93,12 @@ void init_async_emif(int num_cs, struct async_emif_config *config)
 {
 	int cs;
 
+#ifdef K2_AEMIF_PERF_DEGRADE_ERRATA_FIX
+	u32 tmp;
+	tmp = __raw_readl(ASYNC_EMIF_BASE + 8);
+	tmp |= 0x80000000;
+	__raw_writel(tmp, ASYNC_EMIF_BASE + 8);
+#endif
 	for (cs = 0; cs < num_cs; cs++)
 		configure_async_emif(cs, config + cs);
 }
