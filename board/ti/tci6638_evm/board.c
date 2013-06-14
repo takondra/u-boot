@@ -521,6 +521,19 @@ eth_priv_t eth_priv_cfg[] = {
 	},
 };
 
+inline int get_num_eth_ports(void)
+{
+	return (sizeof(eth_priv_cfg) / sizeof(eth_priv_t));
+}
+
+eth_priv_t *get_eth_priv_ptr(int port_num)
+{
+	if (port_num < 0 || port_num >= get_num_eth_ports())
+		return NULL;
+
+	return &eth_priv_cfg[port_num]; 
+}
+
 int get_eth_env_param(char *env_name)
 {
 	char * env;
@@ -545,7 +558,7 @@ int board_eth_init(bd_t *bis)
 
 	tci6614_emac_set_has_mdio(has_mdio);
 
-	for (j=0; j < (sizeof(eth_priv_cfg) / sizeof(eth_priv_t)); j++) {
+	for (j=0; j < get_num_eth_ports(); j++) {
 		sprintf(link_type_name, "sgmii%d_link_type", j);
 		res = get_eth_env_param(link_type_name);
 		if (res < 0) {
