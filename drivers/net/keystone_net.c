@@ -31,6 +31,7 @@ unsigned int emac_dbg = 0;
 #define debug_emac(fmt, args...) if (emac_dbg) printf(fmt, ##args)
 
 unsigned int emac_open = 0;
+static unsigned int loopback_test = 0;
 static unsigned int sys_has_mdio = 1;
 
 #ifdef TCI6614_EMAC_GIG_ENABLE
@@ -65,7 +66,6 @@ static int marvell_88e1111_init_phy(int phy_addr);
 static int marvell_88e1111_is_phy_connected(int phy_addr);
 static int marvell_88e1111_get_link_speed(int phy_addr);
 static int marvell_88e1111_auto_negotiate(int phy_addr);
-
 #ifdef CONFIG_SOC_TCI6638
 void sgmii_serdes_setup_156p25mhz(void);
 void sgmii_serdes_shutdown(void);
@@ -402,7 +402,6 @@ int keystone_get_link_status(struct eth_device *dev)
 	for (j = 0; (j < CONFIG_GET_LINK_STATUS_ATTEMPTS) && (link_state == 0); j++) {
 #endif
 		sgmii_link = keystone_sgmii_link_status(eth_priv->slave_port - 1);
-
 		if (sgmii_link) {
 			link_state = 1;
 
@@ -635,11 +634,9 @@ int32_t cpmac_drv_send(u32* buffer, int num_bytes, int slave_port_num)
 			  (slave_port_num) << 16);
 }
 
-extern eth_priv_t *eth_priv_cfg;
 /* Eth device open */
 static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 {
-	int32_t n;
 	u_int32_t clkdiv;
 	int link;
 #ifndef CONFIG_SOC_TCI6638
@@ -706,13 +703,16 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 
 		/* We need to wait for MDIO to start */
 		udelay(1000);
-
-		link = keystone_get_link_status(dev);
-		if (link == 0)
-			return -1;
+		if (!loopback_test) {
+			link = keystone_get_link_status(dev);
+			if (link == 0)
+				return -1;
+		}
 	}
 
-	emac_gigabit_enable(dev);
+	if (!loopback_test) {
+		emac_gigabit_enable(dev);
+	}
 
 	ethss_start();
 
@@ -771,18 +771,22 @@ static int tci6614_eth_send_packet (struct eth_device *dev,
 
 	tx_send_loop = 0;
 
-	if (keystone_get_link_status(dev) == 0)
-		return -1;
+	if (!loopback_test) {
+		if (keystone_get_link_status(dev) == 0)
+			return -1;
 
-	emac_gigabit_enable(dev);
+		emac_gigabit_enable(dev);
+	}
 
 	if (cpmac_drv_send ((u32*) packet, length, eth_priv->slave_port) != 0)
 		return ret_status;
 
-	if (keystone_get_link_status(dev) == 0)
-		return -1;
+	if (!loopback_test) {
+		if (keystone_get_link_status(dev) == 0)
+			return -1;
 
-	emac_gigabit_enable(dev);
+		emac_gigabit_enable(dev);
+	}
 
 	return (length);
 }
@@ -807,11 +811,20 @@ static int tci6614_eth_rcv_packet (struct eth_device *dev)
 	return (pkt_size);
 }
 
-void tci6614_emac_set_has_mdio(int has_mdio)
+inline void tci6614_emac_set_has_mdio(int has_mdio)
 {
 	sys_has_mdio = has_mdio;
 }
 
+inline int tci6614_emag_get_has_mdio(void)
+{
+	return sys_has_mdio;
+}
+
+inline void tci6614_emac_set_loopback_test(int val)
+{
+	loopback_test = val;
+}
 /*
  * This function initializes the EMAC hardware. It does NOT initialize
  * EMAC modules power or pin multiplexors, that is done by board_init()
