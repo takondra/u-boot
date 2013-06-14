@@ -201,6 +201,6 @@ int netcp_close(void);
 int netcp_init(struct rx_buff_desc *rx_buffers);
 int netcp_send(u32 *pkt, int num_bytes, u32 swinfo2);
 void* netcp_recv(u32 **pkt, int* num_bytes);
-
+void netcp_release_rxhd(void *hd);
 
 #endif  /* _KEYSTONE_NAV_H_ */
