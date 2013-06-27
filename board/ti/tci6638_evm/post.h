@@ -101,4 +101,9 @@
 
 extern int ddr_memory_test (u32 start_address, u32 end_address, int quick);
 
+int tci6614_eth_phy_read(u_int8_t phy_addr, u_int8_t reg_num,
+			 u_int16_t *data);
+int tci6614_eth_phy_write(u_int8_t phy_addr, u_int8_t reg_num,
+			  u_int16_t data);
+
 #endif  /* _POST_H_ */
