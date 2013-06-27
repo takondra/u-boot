@@ -174,7 +174,7 @@
 #define BL_MASK				   0x00000003
 #define RRMODE_MASK            0x00040000
 #define UDIMM_MASK             0x20000000
-#define BYTEMASK_MASK          0x0000FC00
+#define BYTEMASK_MASK          0x0003FC00
 #define MPRDQ_MASK             0x00000080
 #define PDQ_MASK               0x00000070
 #define NOSRA_MASK             0x08000000
