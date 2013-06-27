@@ -31,6 +31,7 @@ ifdef CONFIG_SOC_TCI6638
 COBJS	+= cmd_mon.o
 COBJS	+= cmd_fmtimg.o
 COBJS	+= msmc.o
+COBJS	+= highmem.o
 endif
 ifdef CONFIG_SPL_BUILD
 COBJS	+= spl.o
