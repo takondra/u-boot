@@ -451,6 +451,8 @@
 
 #define CONFIG_FASTBOOT_MAX_TRANSFER_SIZE	(SZ_256M - SZ_16M)
 
+#define CONFIG_MMC_FASTBOOT_DEV			1
+
 /* ethernet gadget conflicts with fastboot, so disabled */
 /*
 #define CONFIG_USB_ETHER
