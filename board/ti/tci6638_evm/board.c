@@ -23,6 +23,7 @@
 
 #include <common.h>
 #include <fdt_support.h>
+#include <libfdt.h>
 
 #include <asm/arch/hardware.h>
 #include <asm/arch/clock.h>
@@ -613,12 +614,13 @@ int board_init(void)
 }
 
 #if defined(CONFIG_OF_LIBFDT) && defined(CONFIG_OF_BOARD_SETUP)
+#define K2_DDR3_START_ADDR 0x80000000
 void ft_board_setup(void *blob, bd_t *bd)
 {
 	u64 start[CONFIG_NR_DRAM_BANKS];
 	u64 size[CONFIG_NR_DRAM_BANKS];
+	int bank, lpae, nodeoffset, path;
 	char name[32], *env, *endp;
-	int bank, lpae;
 
 	env = getenv("mem_lpae");
 	lpae = env && simple_strtol(env, NULL, 0);
@@ -629,8 +631,8 @@ void ft_board_setup(void *blob, bd_t *bd)
 
 		/* adjust memory start address for LPAE */
 		if (lpae) {
-			start[bank] -=  0x80000000;
-			start[bank] += 0x800000000;
+			start[bank] -= K2_DDR3_START_ADDR;
+			start[bank] += CONFIG_SYS_LPAE_SDRAM_BASE;
 		}
 
 		/* reserve memory at start of bank */
@@ -653,6 +655,63 @@ void ft_board_setup(void *blob, bd_t *bd)
 	}
 
 	fdt_fixup_memory_banks(blob, start, size, CONFIG_NR_DRAM_BANKS);
+
+	/* Fix up the initrd */
+	if (lpae) {
+		u64 initrd_start, initrd_end, *reserve_start, size;
+		u32 *prop1, *prop2;
+		int path, err;
+		nodeoffset = fdt_path_offset(blob, "/chosen");
+		if (nodeoffset >= 0) {
+			prop1 = fdt_getprop(blob, nodeoffset, "linux,initrd-start", NULL);
+			prop2 = fdt_getprop(blob, nodeoffset, "linux,initrd-end", NULL);
+			if (prop1 && prop2) {
+				initrd_start = __be32_to_cpu(*prop1);
+				initrd_start -= K2_DDR3_START_ADDR;
+				initrd_start += CONFIG_SYS_LPAE_SDRAM_BASE;
+				initrd_start = __cpu_to_be64(initrd_start);
+				initrd_end = __be32_to_cpu(*prop2);
+				initrd_end -= K2_DDR3_START_ADDR;
+				initrd_end += CONFIG_SYS_LPAE_SDRAM_BASE;
+				initrd_end = __cpu_to_be64(initrd_end);
+
+				err = fdt_delprop(blob, nodeoffset, "linux,initrd-start");
+				if (err < 0)
+					printf("error deleting linux,initrd-start\n");
+
+				err = fdt_delprop(blob, nodeoffset, "linux,initrd-end");
+				if (err < 0)
+					printf("error deleting linux,initrd-end\n");
+
+				err = fdt_setprop(blob, nodeoffset, "linux,initrd-start",
+						&initrd_start, sizeof(initrd_start));
+				if (err < 0)
+					printf("error adding linux,initrd-start\n");
+
+				err = fdt_setprop(blob, nodeoffset, "linux,initrd-end",
+						&initrd_end, sizeof(initrd_end));
+				if (err < 0)
+					printf("error adding linux,initrd-end\n");
+			}
+
+			/*
+			 * the initrd and other reserved memory areas are embedded in
+			 * in the DTB itslef. fix up these addresses to 36 bit format
+			 */
+			reserve_start = (char *)blob + fdt_off_mem_rsvmap(blob);
+			while (1) {
+				*reserve_start = __cpu_to_be64(*reserve_start);
+				size = __cpu_to_be64(*(reserve_start + 1));
+				if (size) {
+					*reserve_start -= K2_DDR3_START_ADDR;
+					*reserve_start += CONFIG_SYS_LPAE_SDRAM_BASE;
+					*reserve_start = __cpu_to_be64(*reserve_start);
+				} else
+					break;
+				reserve_start += 2;
+			}
+		}
+	}
 }
 #endif
 

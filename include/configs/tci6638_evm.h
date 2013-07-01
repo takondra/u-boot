@@ -48,6 +48,7 @@
 /* Memory Configuration */
 #define CONFIG_NR_DRAM_BANKS		1
 #define CONFIG_SYS_SDRAM_BASE		0x80000000
+#define CONFIG_SYS_LPAE_SDRAM_BASE	0x800000000
 #define CONFIG_MAX_RAM_BANK_SIZE	(2 << 30)	/* 2GB */
 #define CONFIG_STACKSIZE		(512 << 10)	/* 512 KiB */
 #define CONFIG_SYS_MALLOC_LEN		(512 << 10)	/* 512 KiB */
@@ -275,5 +276,6 @@
 
 /* Keystone2 Emif16 errata config */
 #define K2_AEMIF_PERF_DEGRADE_ERRATA_FIX
+#define CONFIG_SUPPORT_RAW_INITRD
 
 #endif /* __CONFIG_H */
