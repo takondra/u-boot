@@ -630,44 +630,55 @@ int board_init(void)
 #define K2_DDR3_START_ADDR 0x80000000
 void ft_board_setup(void *blob, bd_t *bd)
 {
-	u64 start[CONFIG_NR_DRAM_BANKS];
-	u64 size[CONFIG_NR_DRAM_BANKS];
-	int bank, lpae, nodeoffset, path;
+	u64 start[2];
+	u64 size[2];
 	char name[32], *env, *endp;
+	int bank, lpae, nodeoffset, path;
+	u32 ddr3a_size;
+	int nbanks;
 
 	env = getenv("mem_lpae");
 	lpae = env && simple_strtol(env, NULL, 0);
 
-	for (bank = 0; bank < CONFIG_NR_DRAM_BANKS; bank++) {
-		start[bank] = bd->bi_dram[bank].start;
-		size[bank]  = bd->bi_dram[bank].size;
-
-		/* adjust memory start address for LPAE */
-		if (lpae) {
-			start[bank] -= K2_DDR3_START_ADDR;
-			start[bank] += CONFIG_SYS_LPAE_SDRAM_BASE;
-		}
-
-		/* reserve memory at start of bank */
-		if (bank)
-			sprintf(name, "mem_reserve_head%d", bank);
-		else
-			sprintf(name, "mem_reserve_head");
-		env = getenv(name);
+	ddr3a_size = 0;
+	if (lpae) {
+		env = getenv("ddr3a_size");
 		if (env)
-			start[bank] += ustrtoul(env, &endp, 0);
-
-		/* reserve memory at end of bank if needed */
-		if (bank)
-			sprintf(name, "mem_reserve%d", bank);
-		else
-			sprintf(name, "mem_reserve");
-		env = getenv(name);
-		if (env)
-			size[bank] -= ustrtoul(env, &endp, 0);
+			ddr3a_size = simple_strtol(env, NULL, 10);
+		if ((ddr3a_size != 8) && (ddr3a_size != 4))
+			ddr3a_size = 0;
 	}
 
-	fdt_fixup_memory_banks(blob, start, size, CONFIG_NR_DRAM_BANKS);
+	nbanks = 1;
+	start[0] = bd->bi_dram[0].start;
+	size[0]  = bd->bi_dram[0].size;
+
+	/* adjust memory start address for LPAE */
+	if (lpae) {
+		start[0] -= K2_DDR3_START_ADDR;
+		start[0] += CONFIG_SYS_LPAE_SDRAM_BASE;
+	}
+
+	if ((size[0] == 0x80000000) && (ddr3a_size != 0)) {
+		size[1] = ((u64)ddr3a_size - 2) << 30;
+		start[1] = 0x880000000;
+		nbanks++;
+	}
+
+	/* reserve memory at start of bank */
+	sprintf(name, "mem_reserve_head");
+	env = getenv(name);
+	if (env) {
+		start[0] += ustrtoul(env, &endp, 0);
+		size[0] -= ustrtoul(env, &endp, 0);
+	}
+
+	sprintf(name, "mem_reserve");
+	env = getenv(name);
+	if (env)
+		size[0] -= ustrtoul(env, &endp, 0);
+
+	fdt_fixup_memory_banks(blob, start, size, nbanks);
 
 	/* Fix up the initrd */
 	if (lpae) {
