@@ -116,6 +116,9 @@ void spl_init_keystone_plls(void)
 }
 #endif
 
+
+/* #define DUAL_RANK 1 */
+
 static struct ddr3_emif_config ddr3_1600_64 = {
 	.sdcfg		= 0x6200CE62ul,
 	.sdtim1		= 0x16709C55ul,
@@ -157,12 +160,20 @@ static struct ddr3_emif_config ddr3_1333_64 = {
 };
 
 static struct ddr3_emif_config ddr3_1333_32 = {
+#ifdef DUAL_RANK
+	.sdcfg		= 0x62009C6aul,
+#else
 	.sdcfg		= 0x62009C62ul,
+#endif
 	.sdtim1		= 0x125C8044ul,
 	.sdtim2		= 0x00001D29ul,
 	.sdtim3		= 0x32CDFF43ul,
 	.sdtim4		= 0x543F0ADFul,
+#ifdef DUAL_RANK
 	.zqcfg		= 0x70073200ul,
+#else
+	.zqcfg		= 0xf0073200ul,
+#endif
 	.sdrfc		= 0x00001457ul,
 };
 
@@ -208,7 +219,7 @@ static struct ddr3_emif_config ddr3_200_32 = {
 
 static struct ddr3_phy_config ddr3phy_1600_64 = {
 	.pllcr		= 0x0001C000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
@@ -234,7 +245,7 @@ static struct ddr3_phy_config ddr3phy_1600_64 = {
 
 static struct ddr3_phy_config ddr3phy_1600_64A = {
 	.pllcr		= 0x0001C000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
@@ -259,7 +270,7 @@ static struct ddr3_phy_config ddr3phy_1600_64A = {
 };
 static struct ddr3_phy_config ddr3phy_1600_32 = {
 	.pllcr		= 0x0001C000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
@@ -285,7 +296,7 @@ static struct ddr3_phy_config ddr3phy_1600_32 = {
 
 static struct ddr3_phy_config ddr3phy_1333_64 = {
 	.pllcr		= 0x0005C000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
@@ -311,22 +322,31 @@ static struct ddr3_phy_config ddr3phy_1333_64 = {
 
 static struct ddr3_phy_config ddr3phy_1333_32 = {
 	.pllcr		= 0x0005C000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
 	.ptr2		= 0, /* not set in gel */
 	.ptr3		= 0x0B4515C2ul,
 	.ptr4		= 0x0A6E08B4ul,
+#ifdef DUAL_RANK
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27)),
+#else
 	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK | UDIMM_MASK),
 	.dcr_val	= ((1 << 10) | (1 << 27) | (1 << 29)),
+#endif
 	.dtpr0		= 0x8558AA55ul,
 	.dtpr1		= 0x12857280ul,
 	.dtpr2		= 0x5002C200ul,
 	.mr0		= 0x00001A60ul,
 	.mr1		= 0x00000006ul,
 	.mr2		= 0x00000010ul,
+#ifdef DUAL_RANK
+	.dtcr		= 0x730035C7ul,
+#else
 	.dtcr		= 0x710035C7ul,
+#endif
 	.pgcr2		= 0x00F065B8ul,
 	.zq0cr1		= 0x0000005Dul,
 	.zq1cr1		= 0x0000005Bul,
@@ -337,7 +357,7 @@ static struct ddr3_phy_config ddr3phy_1333_32 = {
 
 static struct ddr3_phy_config ddr3phy_1066_64 = {
 	.pllcr		= 0x000DC000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
@@ -363,7 +383,7 @@ static struct ddr3_phy_config ddr3phy_1066_64 = {
 
 static struct ddr3_phy_config ddr3phy_1066_32 = {
 	.pllcr		= 0x000DC000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
@@ -389,7 +409,7 @@ static struct ddr3_phy_config ddr3phy_1066_32 = {
 
 static struct ddr3_phy_config ddr3phy_200_64 = {
 	.pllcr		= 0x000DC000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
@@ -415,7 +435,7 @@ static struct ddr3_phy_config ddr3phy_200_64 = {
 
 static struct ddr3_phy_config ddr3phy_200_32 = {
 	.pllcr		= 0x000DC000ul,
-	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK | ZCKSEL_MASK),
+	.pgcr1_mask	= (IODDRM_MASK | ZCKSEL_MASK),
 	.pgcr1_val	= ((1 << 2) | (1 << 7) | (1 << 23)),
 	.ptr0		= 0x42C21590ul,
 	.ptr1		= 0xD05612C0ul,
