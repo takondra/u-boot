@@ -653,7 +653,7 @@ void ft_board_setup(void *blob, bd_t *bd)
 	u64 start[2];
 	u64 size[2];
 	char name[32], *env, *endp;
-	int bank, lpae, nodeoffset, path;
+	int lpae, nodeoffset;
 	u32 ddr3a_size;
 	int nbanks;
 
@@ -704,7 +704,7 @@ void ft_board_setup(void *blob, bd_t *bd)
 	if (lpae) {
 		u64 initrd_start, initrd_end, *reserve_start, size;
 		u32 *prop1, *prop2;
-		int path, err;
+		int err;
 		nodeoffset = fdt_path_offset(blob, "/chosen");
 		if (nodeoffset >= 0) {
 			prop1 = fdt_getprop(blob, nodeoffset, "linux,initrd-start", NULL);
