@@ -155,14 +155,21 @@ int do_psc_cmd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		return 0;
 	}
 
+	if (strcmp(argv[2], "domain") == 0) {
+		res = psc_disable_domain(psc_module);
+		printf("psc_disable_domain(%d) - %s\n", psc_module,
+			(res) ? "ERROR" : "OK");
+		return 0;
+	}
+
 psc_cmd_usage:
 	return cmd_usage(cmdtp);
 }
 
 U_BOOT_CMD(
 	psc,	3,	0,	do_psc_cmd,
-	"<enable/disable psc module>",
-	"<mod index> <en|di>\n"
+	"<enable/disable psc module os disable domain>",
+	"<mod/domain index> <en|di|domain>\n"
 	"See the hardware.h for Power and Sleep Controller (PSC) Domains\n"
 );
 
