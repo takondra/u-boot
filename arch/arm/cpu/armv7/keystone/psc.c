@@ -49,7 +49,7 @@
 int psc_delay (void)
 {
   udelay(10);
-  return (0);
+  return (10);
 }
 
 
@@ -262,9 +262,7 @@ int psc_disable_domain (u32 domain_num)
   ptcmd |= (u32)(1<<domain_num);
   DEVICE_REG32_W (DEVICE_PSC_BASE + PSC_REG_PTCMD, ptcmd);
 
-  psc_wait (domain_num);
-
-  return (0);
+  return (psc_wait (domain_num));
 
 } /* psc_disable_domain */
 
