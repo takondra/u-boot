@@ -25,6 +25,8 @@
 
 #include <twl6030.h>
 
+static struct twl6030_data *twl;
+
 static int twl6030_gpadc_read_channel(u8 channel_no)
 {
 	u8 lsb = 0;

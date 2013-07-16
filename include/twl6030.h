@@ -129,6 +129,20 @@
 #define GPCH0_LSB	0x57
 #define GPCH0_MSB	0x58
 
+typedef enum {
+	chip_TWL6030,
+	chip_TWL603X_cnt
+}t_TWL603X_chip_type;
+
+struct twl6030_data{
+	t_TWL603X_chip_type chip_type;
+	u8 adc_rbase;
+	u8 adc_ctrl;
+	u8 adc_enable;
+	int vbat_mult;
+	int vbat_shift;
+};
+
 /* Functions to read and write from TWL6030 */
 static inline int twl6030_i2c_write_u8(u8 chip_no, u8 reg, u8 val)
 {
