@@ -129,6 +129,12 @@
 #define GPCH0_LSB	0x57
 #define GPCH0_MSB	0x58
 
+#define USB_PRODUCT_ID_LSB	0x02
+
+#define TWL6030_VBAT_MULT	40 * 1000
+
+#define TWL6030_VBAT_SHIFT	(10 + 3)
+
 typedef enum {
 	chip_TWL6030,
 	chip_TWL603X_cnt
