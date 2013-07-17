@@ -23,6 +23,11 @@
  * MA 02111-1307 USA
  */
 #include <common.h>
+#include <asm/omap_musb.h>
+#include <asm/errno.h>
+#include <linux/usb/ch9.h>
+#include <linux/usb/gadget.h>
+#include <linux/usb/musb.h>
 #include <twl6030.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/arch/mmc_host_def.h>
@@ -55,6 +60,33 @@ int board_eth_init(bd_t *bis)
 	return 0;
 }
 
+#ifdef CONFIG_USB_MUSB_OMAP2PLUS
+static struct musb_hdrc_config musb_config = {
+	.multipoint     = 1,
+	.dyn_fifo       = 1,
+	.num_eps        = 16,
+	.ram_bits       = 12,
+};
+
+static struct omap_musb_board_data musb_board_data = {
+	.interface_type	= MUSB_INTERFACE_UTMI,
+};
+
+static struct musb_hdrc_platform_data musb_plat = {
+#if defined(CONFIG_MUSB_HOST)
+	.mode           = MUSB_HOST,
+#elif defined(CONFIG_MUSB_GADGET)
+	.mode		= MUSB_PERIPHERAL,
+#else
+#error "Please define either CONFIG_MUSB_HOST or CONFIG_MUSB_GADGET"
+#endif
+	.config         = &musb_config,
+	.power          = 100,
+	.platform_ops	= &omap2430_ops,
+	.board_data	= &musb_board_data,
+};
+#endif
+
 /**
  * @brief misc_init_r - Configure SDP board specific configurations
  * such as power configurations, ethernet initialization as phase2 of
@@ -64,6 +96,10 @@ int board_eth_init(bd_t *bis)
  */
 int misc_init_r(void)
 {
+#ifdef CONFIG_USB_MUSB_OMAP2PLUS
+	musb_register(&musb_plat, &musb_board_data, (void *)MUSB_BASE);
+#endif
+
 #ifdef CONFIG_TWL6030_POWER
 	twl6030_init_battery_charging();
 #endif

@@ -105,16 +105,6 @@
 #define CONFIG_OMAP_HSMMC		1
 #define CONFIG_DOS_PARTITION		1
 
-
-/* USB */
-#define CONFIG_MUSB_UDC			1
-#define CONFIG_USB_OMAP3		1
-
-/* USB device configuration */
-#define CONFIG_USB_DEVICE		1
-#define CONFIG_USB_TTY			1
-#define CONFIG_SYS_CONSOLE_IS_IN_ENV	1
-
 /* Flash */
 #define CONFIG_SYS_NO_FLASH	1
 
@@ -261,6 +251,12 @@
 #define CONFIG_SYS_AUTOMATIC_SDRAM_DETECTION
 #define CONFIG_SYS_DEFAULT_LPDDR2_TIMINGS
 #endif
+
+/* USB */
+#define CONFIG_MUSB_GADGET
+#define CONFIG_USB_MUSB_OMAP2PLUS
+#define CONFIG_MUSB_PIO_ONLY
+#define CONFIG_USB_GADGET_DUALSPEED
 
 /* Android fastboot support over USB */
 #define CONFIG_CMD_FASTBOOT
