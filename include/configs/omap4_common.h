@@ -262,6 +262,12 @@
 #define CONFIG_SYS_DEFAULT_LPDDR2_TIMINGS
 #endif
 
+/* Android fastboot support over USB */
+#define CONFIG_CMD_FASTBOOT
+#define FASTBOOT_DEVICE_VENDOR_ID      0x0451
+#define FASTBOOT_DEVICE_PRODUCT_ID     0xd022 /* TI fastboot PID */
+#define FASTBOOT_DEVICE_BCD            0x0100
+
 /* Defines for SPL */
 #define CONFIG_SPL
 #define CONFIG_SPL_FRAMEWORK
