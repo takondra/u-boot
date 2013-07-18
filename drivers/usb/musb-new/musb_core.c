@@ -455,7 +455,7 @@ static irqreturn_t musb_stage0_irq(struct musb *musb, u8 int_usb,
 #endif
 	irqreturn_t handled = IRQ_NONE;
 
-	dev_dbg(musb->controller, "<== Power=%02x, DevCtl=%02x, int_usb=0x%x\n", power, devctl,
+	dev_info(musb->controller, "<== Power=%02x, DevCtl=%02x, int_usb=0x%x\n", power, devctl,
 		int_usb);
 
 #ifndef __UBOOT__
@@ -931,7 +931,7 @@ void musb_start(struct musb *musb)
 {
 	void __iomem	*regs = musb->mregs;
 	u8		devctl = musb_readb(regs, MUSB_DEVCTL);
-
+	printf("%s: >>>\n", __func__);
 	dev_dbg(musb->controller, "<== devctl %02x\n", devctl);
 
 	/*  Set INT enable registers, enable interrupts */
@@ -977,6 +977,7 @@ void musb_start(struct musb *musb)
 	}
 	musb_platform_enable(musb);
 	musb_writeb(regs, MUSB_DEVCTL, devctl);
+	printf("%s: <<<\n", __func__);
 }
 
 
@@ -1544,7 +1545,7 @@ static irqreturn_t generic_interrupt(int irq, void *__hci)
 	unsigned long	flags;
 	irqreturn_t	retval = IRQ_NONE;
 	struct musb	*musb = __hci;
-
+	//printf("%s: >>>\n", __func__);
 	spin_lock_irqsave(&musb->lock, flags);
 
 	musb->int_usb = musb_readb(musb->mregs, MUSB_INTRUSB);
@@ -1555,7 +1556,7 @@ static irqreturn_t generic_interrupt(int irq, void *__hci)
 		retval = musb_interrupt(musb);
 
 	spin_unlock_irqrestore(&musb->lock, flags);
-
+	//printf("%s: <<<\n", __func__);
 	return retval;
 }
 
@@ -1580,7 +1581,7 @@ irqreturn_t musb_interrupt(struct musb *musb)
 	devctl = musb_readb(musb->mregs, MUSB_DEVCTL);
 	power = musb_readb(musb->mregs, MUSB_POWER);
 
-	dev_dbg(musb->controller, "** IRQ %s usb%04x tx%04x rx%04x\n",
+	dev_info(musb->controller, "** IRQ %s usb%04x tx%04x rx%04x\n",
 		(devctl & MUSB_DEVCTL_HM) ? "host" : "peripheral",
 		musb->int_usb, musb->int_tx, musb->int_rx);
 

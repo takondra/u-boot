@@ -213,7 +213,7 @@ int musb_register(struct musb_hdrc_platform_data *plat, void *bdata,
 			void *ctl_regs)
 {
 	struct musb **musbp;
-
+	printf("%s: >>>\n", __func__);
 	switch (plat->mode) {
 #ifdef CONFIG_MUSB_HOST
 	case MUSB_HOST:
@@ -234,6 +234,6 @@ int musb_register(struct musb_hdrc_platform_data *plat, void *bdata,
 		printf("Failed to init the controller\n");
 		return -EIO;
 	}
-
+	printf("%s: <<<\n", __func__);
 	return 0;
 }

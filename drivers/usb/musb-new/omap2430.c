@@ -331,7 +331,7 @@ static int omap2430_musb_init(struct musb *musb)
 	struct omap_musb_board_data *data =
 		(struct omap_musb_board_data *)musb->controller;
 #endif
-
+	printf("%s: >>>\n", __func__);
 
 #ifndef __UBOOT__
 	/* We require some kind of external transceiver, hooked
@@ -379,6 +379,7 @@ static int omap2430_musb_init(struct musb *musb)
 
 	pm_runtime_put_noidle(musb->controller);
 #endif
+	printf("%s: <<<\n", __func__);
 	return 0;
 
 err1:

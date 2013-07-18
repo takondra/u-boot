@@ -66,17 +66,31 @@ static inline void writesb(const void __iomem *addr, const void *buf, int len)
 /* NOTE:  these offsets are all in bytes */
 
 static inline u16 musb_readw(const void __iomem *addr, unsigned offset)
-	{ return __raw_readw(addr + offset); }
+{
+	u16 data = __raw_readw(addr + offset);
+	//printf("%s: addr = %p, data = %04x\n", __func__, addr + offset, data);
+	return data;
+}
 
 static inline u32 musb_readl(const void __iomem *addr, unsigned offset)
-	{ return __raw_readl(addr + offset); }
+{
+	u32 data = __raw_readl(addr + offset);
+	//printf("%s: addr = %p, data = %08x\n", __func__, addr + offset, data);
+	return data;
+}
 
 
 static inline void musb_writew(void __iomem *addr, unsigned offset, u16 data)
-	{ __raw_writew(data, addr + offset); }
+{
+	//printf("%s: addr = %p, data = %04x\n", __func__, addr + offset, data);
+	__raw_writew(data, addr + offset);
+}
 
 static inline void musb_writel(void __iomem *addr, unsigned offset, u32 data)
-	{ __raw_writel(data, addr + offset); }
+{
+	//printf("%s: addr = %p, data = %08x\n", __func__, addr + offset, data);
+	__raw_writel(data, addr + offset);
+}
 
 
 #if defined(CONFIG_USB_MUSB_TUSB6010) || defined (CONFIG_USB_MUSB_TUSB6010_MODULE)
@@ -114,10 +128,17 @@ static inline void musb_writeb(void __iomem *addr, unsigned offset, u8 data)
 #else
 
 static inline u8 musb_readb(const void __iomem *addr, unsigned offset)
-	{ return __raw_readb(addr + offset); }
+{
+	u8 data = __raw_readb(addr + offset);
+	//printf("%s: addr = %p, data = %02x\n", __func__, addr + offset, data);
+	return data;
+}
 
 static inline void musb_writeb(void __iomem *addr, unsigned offset, u8 data)
-	{ __raw_writeb(data, addr + offset); }
+{
+	//printf("%s: addr = %p, data = %02x\n", __func__, addr + offset, data);
+	__raw_writeb(data, addr + offset);
+}
 
 #endif	/* CONFIG_USB_MUSB_TUSB6010 */
 

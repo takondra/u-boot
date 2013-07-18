@@ -679,7 +679,7 @@ irqreturn_t musb_g_ep0_irq(struct musb *musb)
 	csr = musb_readw(regs, MUSB_CSR0);
 	len = musb_readb(regs, MUSB_COUNT0);
 
-	dev_dbg(musb->controller, "csr %04x, count %d, myaddr %d, ep0stage %s\n",
+	dev_info(musb->controller, "csr %04x, count %d, myaddr %d, ep0stage %s\n",
 			csr, len,
 			musb_readb(mbase, MUSB_FADDR),
 			decode_ep0stage(musb->ep0_state));
