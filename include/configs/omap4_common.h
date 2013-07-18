@@ -264,6 +264,15 @@
 #define FASTBOOT_DEVICE_PRODUCT_ID     0xd022 /* TI fastboot PID */
 #define FASTBOOT_DEVICE_BCD            0x0100
 
+/*
+ * The current fastboot implementation assumes maximum 16MB of RAM
+ * will be used by u-boot itself. So the fastboot transfer buffer
+ * becomes (256-16)=240MB
+ */
+
+#define CONFIG_FASTBOOT_MAX_TRANSFER_SIZE	(SZ_256M - SZ_16M)
+#define CONFIG_MMC_FASTBOOT_DEV			1
+
 /* Defines for SPL */
 #define CONFIG_SPL
 #define CONFIG_SPL_FRAMEWORK
