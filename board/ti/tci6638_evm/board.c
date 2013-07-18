@@ -637,11 +637,31 @@ int board_early_init_f(void)
 }
 #endif
 
+int turn_off_all_dsps(void)
+{
+	int j;
+	int ret = 0;
+
+	for (j=0; j<8; j++) {
+		if (psc_disable_module(j + TCI6638_LPSC_GEM_0))
+			ret = 1;
+		if (psc_disable_domain(j + 8))
+			ret = 1;
+	}
+
+	return ret;
+}
+
+
+
+
 int board_init(void)
 {
 
 	gd->bd->bi_arch_number = -1; /* MACH_TYPE_TCI6638_EVM; */
 	gd->bd->bi_boot_params = LINUX_BOOT_PARAM_ADDR;
+
+	turn_off_all_dsps();
 
 	return 0;
 }
