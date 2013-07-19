@@ -407,7 +407,25 @@ int handle_flash(char *part_name, char *response)
 
         if (fastboot_cfg.download_bytes) {
                 struct fastboot_ptentry *ptn;
+		char dev[2];
+		char *mmc_dev[3] = {"mmc", "dev", NULL};
+                char *mmc_init[2] = {"mmc", "rescan",};
 
+		mmc_dev[2] = dev;
+		sprintf(dev,"0x%x", CONFIG_MMC_FASTBOOT_DEV);
+
+		if (do_mmcops(NULL, 0, 3, mmc_dev)) {
+			printf("MMC DEV: %d selection FAILED!\n", CONFIG_MMC_FASTBOOT_DEV);
+			return -1;
+		}
+
+                printf("Initializing MMC %d\n", CONFIG_MMC_FASTBOOT_DEV);
+                if (do_mmcops(NULL, 0, 2, mmc_init))
+                        sprintf(response, "FAIL:Init of MMC card");
+                else
+                        sprintf(response, "OKAY");
+
+                load_ptbl();
                 /* Next is the partition name */
                 ptn = fastboot_flash_find_ptn(part_name);
 
@@ -444,17 +462,6 @@ int handle_flash(char *part_name, char *response)
                         length[0] = '\0';
 
                         char *mmc_write[5]  = {"mmc", "write", NULL, NULL, NULL};
-                        char *mmc_init[2] = {"mmc", "rescan",};
-			char dev[2];
-			char *mmc_dev[3] = {"mmc", "dev", NULL};
-
-			mmc_dev[2] = dev;
-			sprintf(dev,"0x%x", CONFIG_MMC_FASTBOOT_DEV);
-
-			if (do_mmcops(NULL, 0, 3, mmc_dev)) {
-				printf("MMC DEV: %d selection FAILED!\n", CONFIG_MMC_FASTBOOT_DEV);
-				return -1;
-			}
 
                         mmc_write[2] = source;
                         mmc_write[3] = dest;
@@ -463,12 +470,6 @@ int handle_flash(char *part_name, char *response)
                         sprintf(source, "0x%x", fastboot_cfg.transfer_buffer);
                         sprintf(dest, "0x%x", ptn->start);
                         sprintf(length, "0x%x", (fastboot_cfg.download_bytes/512)+1);
-
-                        printf("Initializing '%s'\n", ptn->name);
-                        if (do_mmcops(NULL, 0, 2, mmc_init))
-                                sprintf(response, "FAIL:Init of MMC card");
-                        else
-                                sprintf(response, "OKAY");
 
                         printf("Writing '%s'\n", ptn->name);
                         if (do_mmcops(NULL, 0, 5, mmc_write)) {
