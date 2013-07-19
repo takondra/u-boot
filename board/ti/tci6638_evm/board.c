@@ -661,7 +661,21 @@ int board_init(void)
 	gd->bd->bi_arch_number = -1; /* MACH_TYPE_TCI6638_EVM; */
 	gd->bd->bi_boot_params = LINUX_BOOT_PARAM_ADDR;
 
-	turn_off_all_dsps();
+	return 0;
+}
+
+int __weak misc_init_r(void)
+{
+	char *env;
+
+	debug_options = 0;
+	env = getenv("debug_options");
+
+	if (env)
+		debug_options = simple_strtol(env, NULL, 0);
+
+	if((debug_options & DBG_LEAVE_DSPS_ON) == 0)
+		turn_off_all_dsps();
 
 	return 0;
 }

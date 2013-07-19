@@ -165,6 +165,9 @@ void map_ses_segment(int priv_id, int ses_pair,
 		     u32 src_pfn, u32 dst_pfn, mpax_seg_size size);
 void share_all_segments(int priv_id);
 
+extern u32 debug_options;
 #endif
+
+#define DBG_LEAVE_DSPS_ON	0x1 
 
 #endif /* __ASM_ARCH_HARDWARE_H */

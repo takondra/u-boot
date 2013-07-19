@@ -192,6 +192,7 @@
 #define CONFIG_CMD_EEPROM
 
 /* U-Boot general configuration */
+#define CONFIG_MISC_INIT_R
 #define CONFIG_SYS_PROMPT		"TCI6638 EVM # "
 #define CONFIG_SYS_CBSIZE		1024
 #define CONFIG_SYS_PBSIZE		2048

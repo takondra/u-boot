@@ -26,6 +26,8 @@
 #include <asm/arch/clock.h>
 #include <asm/arch/hardware.h>
 
+u32 debug_options;
+
 void chip_configuration_unlock(void)
 {
 	__raw_writel(KEYSTONE_KICK0_MAGIC, KEYSTONE_KICK0);
