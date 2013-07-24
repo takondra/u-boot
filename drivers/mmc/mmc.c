@@ -1620,13 +1620,13 @@ int mmc_boot_part_access(struct mmc *mmc, u8 ack, u8 part_num, u8 access)
 	}
 
 	if (access) {
-		/* 4bit transfer mode at booting time. */
+		/* 1bit transfer mode at booting time. */
 		cmd.cmdidx = MMC_CMD_SWITCH;
 		cmd.resp_type = MMC_RSP_R1b;
 
 		cmd.cmdarg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
 				(EXT_CSD_BOOT_BUS_WIDTH << 16) |
-				((1 << 0) << 8);
+				((0 << 0) << 8);
 
 		err = mmc_send_cmd(mmc, &cmd, NULL);
 		if (err) {
