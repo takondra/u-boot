@@ -23,6 +23,7 @@
 
 #include <common.h>
 #include <command.h>
+asm(".arch_extension sec\n\t");
 
 static int mon_install(u32 addr, u32 dpsc, u32 freq)
 {
@@ -79,13 +80,10 @@ int mon_power_on(int core_id, void *ep)
 
 	asm volatile (
 		"stmfd  r13!, {lr}\n"
-		"mov r0, %1\n"
-		"mov r1, %2\n"
-#ifdef CONFIG_SYS_THUMB_BUILD
-		".inst.w  0xe1600070\n"
-#else
-		".inst  0xe1600070\n"
-#endif
+		"mov r1, %1\n"
+		"mov r2, %2\n"
+		"mov r0, #0\n"
+		"smc	#0\n"
 		"ldmfd  r13!, {lr}\n"
 		: "=&r" (result)
 		: "r" (core_id), "r" (ep)
@@ -99,12 +97,9 @@ int mon_power_off(int core_id)
 
 	asm volatile (
 		"stmfd  r13!, {lr}\n"
-		"mov r0, %1\n"
-#ifdef CONFIG_SYS_THUMB_BUILD
-		".inst.w  0xe1600071\n"
-#else
-		".inst  0xe1600071\n"
-#endif
+		"mov r1, %1\n"
+		"mov r0, #1\n"
+		"smc	#1\n"
 		"ldmfd  r13!, {lr}\n"
 		: "=&r" (result)
 		: "r" (core_id)
