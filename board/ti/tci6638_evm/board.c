@@ -657,21 +657,13 @@ int turn_off_myself(void)
 	printf("Turning off ourselves\r\n");
 	mon_power_off(0);
 
-	/* disable dcache w/o invalidation */ 
-	asm volatile (
-		"mrc	p15, 0, r8, c1, c0, 0	\n"
-		"bic	%0, %0, #(1 << 2)	\n"
-		"mcr	p15, 0, r8, c1, c0, 0	\n"
-		"isb				\n"
-	);
-
 	psc_disable_module(TCI6638_LPSC_TETRIS);
 	psc_disable_domain(31);
 
 	asm volatile (
-		      "isb	\n"
-		      "dsb	\n"
-		      "wfi	\n"
+		      "isb\n"
+		      "dsb\n"
+		      "wfi\n"
 		     );
 
 	printf("What! Should not see that\n");
