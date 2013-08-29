@@ -36,9 +36,9 @@ static int mon_install(u32 addr, u32 dpsc, u32 freq)
 		"mov r2, %3\n"
 		"blx r0\n"
 		"ldmfd r13!, {lr}\n"
-	: "=&r" (result)
-	: "r" (addr), "r" (dpsc), "r" (freq)
-	: "cc", "memory");
+		: "=&r" (result)
+		: "r" (addr), "r" (dpsc), "r" (freq)
+		: "cc", "r0", "r1", "r2", "memory");
 	return result;
 }
 
@@ -87,7 +87,7 @@ int mon_power_on(int core_id, void *ep)
 		"ldmfd  r13!, {lr}\n"
 		: "=&r" (result)
 		: "r" (core_id), "r" (ep)
-		: "cc",  "memory");
+		: "cc", "r0", "r1", "r2", "memory");
 	return  result;
 }
 
@@ -103,7 +103,7 @@ int mon_power_off(int core_id)
 		"ldmfd  r13!, {lr}\n"
 		: "=&r" (result)
 		: "r" (core_id)
-		: "cc",  "memory");
+		: "cc", "r0", "r1", "memory");
 	return  result;
 }
 
