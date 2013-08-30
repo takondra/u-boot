@@ -45,7 +45,7 @@
  ******************************************************************************/
 int post_test_external_memory ( void )
 {
-	puts("POST extrenal memory ... ");
+	puts("POST external memory ... ");
 	if(ddr_memory_test(POST_DDR3_START_ADDR, POST_DDR3_END_ADDR, 1) != 0) {
 		puts("FAILED\r\n");
 		WAIT_OR_RETURN;
