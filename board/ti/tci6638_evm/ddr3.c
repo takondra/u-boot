@@ -326,7 +326,7 @@ void init_ddr3( void ) {
 			init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_32);
 		}
 	}
-	else if (!strcmp(dimm_name, "SQR-SD3T-2G1333SED")) {
+	else {
 		init_pll(&ddr3a_333);
 		if (cpu_revision() > 0) {
 			init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1333_64A);
@@ -336,10 +336,6 @@ void init_ddr3( void ) {
 			init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1333_32);
 			init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_32);
 		}
-	}
-	else {
-		printf("Unknown SO-DIMM. Cannot configure DDR3\n");
-		while(1);
 	}
 
 	init_pll(&ddr3b_333);
