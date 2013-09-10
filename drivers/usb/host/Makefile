@@ -58,7 +58,7 @@ COBJS-$(CONFIG_USB_EHCI_TEGRA) += ehci-tegra.o
 COBJS-$(CONFIG_USB_EHCI_VCT) += ehci-vct.o
 
 # xchi
-COBJS-$(CONFIG_USB_XHCI) += xhci.o
+COBJS-$(CONFIG_USB_XHCI) += xhci.o xhci-mem.o xhci-ring.o
 COBJS-$(CONFIG_USB_XHCI_KEYSTONE) += xhci-keystone.o
 
 COBJS	:= $(COBJS-y)
