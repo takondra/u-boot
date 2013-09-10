@@ -30,6 +30,8 @@
 #include <asm/cache.h>
 #include <linux/list.h>
 
+typedef enum { false = 0, true = 1 } bool;
+
 /* (shifted) direction/type/recipient from the USB 2.0 spec, table 9.2 */
 #define DeviceRequest \
 	((USB_DIR_IN | USB_TYPE_STANDARD | USB_RECIP_DEVICE) << 8)

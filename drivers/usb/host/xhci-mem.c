@@ -34,7 +34,7 @@
 
 #include "xhci.h"
 
-#define CACHELINE_SIZE		CONFIG_SYS_CACHELINE_SIZE
+#define CACHELINE_SIZE		64
 /**
  * flushes the address passed till the length
  *
