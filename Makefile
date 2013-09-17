@@ -543,7 +543,10 @@ $(obj)u-boot-spi.gph:	$(obj)u-boot.img $(obj)spl/u-boot-spl.bin
 $(obj)u-boot-nand.gph:	$(obj)u-boot.bin
 		$(obj)tools/mkimage -A $(ARCH) -T gpimage -C none \
 			-a $(CONFIG_SYS_TEXT_BASE) -e $(CONFIG_SYS_TEXT_BASE) \
-			-n U-Boot -d $(obj)u-boot.bin $@
+			-n U-Boot -d $(obj)u-boot.bin $(obj)gph-u-boot.bin
+		@dd if=/dev/zero of=$(obj)zero.bin bs=8 count=1 2>/dev/null
+		@cat $(obj)gph-u-boot.bin $(obj)zero.bin > $@
+		@rm $(obj)zero.bin
 
 ifeq ($(SOC),tegra20)
 ifeq ($(CONFIG_OF_SEPARATE),y)
@@ -880,6 +883,7 @@ clobber:	tidy
 	@rm -f $(obj)u-boot.dtb
 	@rm -f $(obj)u-boot.sb
 	@rm -f $(obj)u-boot.spr
+	@rm -f $(obj)u-boot-*.gph
 	@rm -f $(obj)nand_spl/{u-boot.{lds,lst},System.map}
 	@rm -f $(obj)nand_spl/{u-boot-nand_spl.lds,u-boot-spl,u-boot-spl.map}
 	@rm -f $(obj)spl/{u-boot-spl,u-boot-spl.bin,u-boot-spl.map}
