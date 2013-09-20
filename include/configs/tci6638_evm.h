@@ -51,7 +51,7 @@
 #define CONFIG_SYS_LPAE_SDRAM_BASE	0x800000000
 #define CONFIG_MAX_RAM_BANK_SIZE	(2 << 30)	/* 2GB */
 #define CONFIG_STACKSIZE		(512 << 10)	/* 512 KiB */
-#define CONFIG_SYS_MALLOC_LEN		(512 << 10)	/* 512 KiB */
+#define CONFIG_SYS_MALLOC_LEN		(1024 << 10)	/* 1 MiB */
 #define CONFIG_SYS_MEMTEST_START	CONFIG_SYS_SDRAM_BASE
 #define CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_SDRAM_BASE + 32 << 20)
 #define CONFIG_SYS_INIT_SP_ADDR		(CONFIG_SYS_TEXT_BASE -	\
@@ -274,7 +274,7 @@
 		"rdinit=/sbin/init rw root=/dev/ram0\0"			\
 	"no_post=1\0"							\
 	"mtdparts=mtdparts=davinci_nand.0:"				\
-		"1024k(bootloader)ro,512k(params)ro,129536k(ubifs)\0"
+		"1024k(bootloader)ro,512k(params)ro,522752k(ubifs)\0"
 #define CONFIG_BOOTCOMMAND						\
 	"run init_${boot} get_fdt_${boot} get_mon_${boot} "		\
 		"get_kern_${boot} run_mon run_kern"
