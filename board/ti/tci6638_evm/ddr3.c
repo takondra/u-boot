@@ -259,12 +259,16 @@ int get_dimm_params(char *dimm_name)
 {
 	u8 spd_params[256];
 	int ret, y, x;
+	int old_bus;
 
 	i2c_init(CONFIG_SYS_I2C_SPEED, CONFIG_SYS_I2C_SLAVE);
 
+	old_bus = i2c_get_bus_num();
 	i2c_set_bus_num(1);
 
 	ret = i2c_read(0x53, 0, 0, spd_params, 256);
+
+	i2c_set_bus_num(old_bus);
 
 	dimm_name[0] = '\0';
 
