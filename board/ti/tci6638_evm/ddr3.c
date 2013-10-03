@@ -35,15 +35,15 @@ static struct ddr3_phy_config ddr3phy_1600_64A = {
 	.ptr2		= 0, /* not set in gel */
 	.ptr3		= 0x0D861A80ul,
 	.ptr4		= 0x0C827100ul,
-	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK | UDIMM_MASK),
-	.dcr_val	= ((1 << 10) | (1 << 27) | (1 << 29)),
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
+	.dcr_val	= ((1 << 10) | (1 << 27)),
 	.dtpr0		= 0xA19DBB66ul,
 	.dtpr1		= 0x12868300ul,
 	.dtpr2		= 0x50035200ul,
 	.mr0		= 0x00001C70ul,
 	.mr1		= 0x00000006ul,
 	.mr2		= 0x00000018ul,
-	.dtcr		= 0x710035C7ul,
+	.dtcr		= 0x730035C7ul,
 	.pgcr2		= 0x00F07A12ul,
 	.zq0cr1		= 0x0000005Dul,
 	.zq1cr1		= 0x0000005Bul,
@@ -53,7 +53,7 @@ static struct ddr3_phy_config ddr3phy_1600_64A = {
 };
 
 static struct ddr3_emif_config ddr3_1600_64 = {
-	.sdcfg		= 0x6200CE62ul,
+	.sdcfg		= 0x6200CE6aul,
 	.sdtim1		= 0x16709C55ul,
 	.sdtim2		= 0x00001D4Aul,
 	.sdtim3		= 0x435DFF54ul,
