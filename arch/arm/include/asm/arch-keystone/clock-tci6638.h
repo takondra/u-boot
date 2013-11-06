@@ -104,7 +104,9 @@ struct pll_init_data {
 #define TETRIS_PLL_812  { TETRIS_PLL,	13,	1,	2 }
 #define TETRIS_PLL_875  { TETRIS_PLL,	14,	1,	2 }
 #define TETRIS_PLL_1188 { TETRIS_PLL,	19,	2,	1 }
+#define TETRIS_PLL_1200 { TETRIS_PLL,	48,	5,	1 }
 #define TETRIS_PLL_1375 { TETRIS_PLL,	22,	2,	1 }
+#define TETRIS_PLL_1400 { TETRIS_PLL,	56,	5,	1 }
 #define DDR3_PLL_200(x)	{ DDR3##x##_PLL,4,	1,	2 }
 #define DDR3_PLL_400(x)	{ DDR3##x##_PLL,16,	1,	4 }
 #define DDR3_PLL_800(x)	{ DDR3##x##_PLL,16,	1,	2 }
