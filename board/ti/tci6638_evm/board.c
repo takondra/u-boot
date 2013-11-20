@@ -27,6 +27,7 @@
 
 #include <asm/arch/hardware.h>
 #include <asm/arch/clock.h>
+#include <asm/arch/clock_defs.h>
 #include <asm/io.h>
 #include <asm/mach-types.h>
 #include <asm/arch/nand_defs.h>
@@ -192,7 +193,6 @@ int cpu_to_bus(u32 *ptr, u32 length)
 int board_early_init_f(void)
 {
 	init_plls(ARRAY_SIZE(pll_config), pll_config);
-
 	return 0;
 }
 #endif

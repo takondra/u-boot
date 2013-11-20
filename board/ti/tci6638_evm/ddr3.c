@@ -24,6 +24,7 @@
 #include <asm/arch/hardware.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
+#include <asm/arch/clock_defs.h>
 
 /************************* *****************************/
 static struct ddr3_phy_config ddr3phy_1600_64A = {
@@ -35,10 +36,10 @@ static struct ddr3_phy_config ddr3phy_1600_64A = {
 	.ptr2		= 0, /* not set in gel */
 	.ptr3		= 0x0D861A80ul,
 	.ptr4		= 0x0C827100ul,
-	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
-	.dcr_val	= ((1 << 10) | (1 << 27)),
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
+	.dcr_val	= ((1 << 10)),
 	.dtpr0		= 0xA19DBB66ul,
-	.dtpr1		= 0x12868300ul,
+	.dtpr1		= 0x32868300ul,
 	.dtpr2		= 0x50035200ul,
 	.mr0		= 0x00001C70ul,
 	.mr1		= 0x00000006ul,
@@ -53,7 +54,7 @@ static struct ddr3_phy_config ddr3phy_1600_64A = {
 };
 
 static struct ddr3_emif_config ddr3_1600_64 = {
-	.sdcfg		= 0x6200CE6aul,
+	.sdcfg		= 0x6200CE6Aul,
 	.sdtim1		= 0x16709C55ul,
 	.sdtim2		= 0x00001D4Aul,
 	.sdtim3		= 0x435DFF54ul,
@@ -71,10 +72,10 @@ static struct ddr3_phy_config ddr3phy_1600_32 = {
 	.ptr2		= 0, /* not set in gel */
 	.ptr3		= 0x0D861A80ul,
 	.ptr4		= 0x0C827100ul,
-	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
-	.dcr_val	= ((1 << 10) | (1 << 27)),
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
+	.dcr_val	= ((1 << 10)),
 	.dtpr0		= 0xA19DBB66ul,
-	.dtpr1		= 0x12868300ul,
+	.dtpr1		= 0x32868300ul,
 	.dtpr2		= 0x50035200ul,
 	.mr0		= 0x00001C70ul,
 	.mr1		= 0x00000006ul,
@@ -89,12 +90,12 @@ static struct ddr3_phy_config ddr3phy_1600_32 = {
 };
 
 static struct ddr3_emif_config ddr3_1600_32 = {
-	.sdcfg		= 0x6200DE6aul,
+	.sdcfg		= 0x6200DE6Aul,
 	.sdtim1		= 0x16709C55ul,
 	.sdtim2		= 0x00001D4Aul,
 	.sdtim3		= 0x435DFF54ul,
 	.sdtim4		= 0x553F0CFFul,
-	.zqcfg		= 0x70073200ul,
+	.zqcfg		= 0xF0073200ul,
 	.sdrfc		= 0x00001869ul,
 };
 
@@ -108,10 +109,10 @@ static struct ddr3_phy_config ddr3phy_1333_64A = {
 	.ptr2		= 0, /* not set in gel */
 	.ptr3		= 0x0B4515C2ul,
 	.ptr4		= 0x0A6E08B4ul,
-	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK | UDIMM_MASK),
-	.dcr_val	= ((1 << 10) | (1 << 27) | (1 << 29)),
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
+	.dcr_val	= ((1 << 10)),
 	.dtpr0		= 0x8558AA55ul,
-	.dtpr1		= 0x12857280ul,
+	.dtpr1		= 0x32857280ul,
 	.dtpr2		= 0x5002C200ul,
 	.mr0		= 0x00001A60ul,
 	.mr1		= 0x00000006ul,
@@ -131,7 +132,7 @@ static struct ddr3_emif_config ddr3_1333_64 = {
 	.sdtim2		= 0x00001D29ul,
 	.sdtim3		= 0x32CDFF43ul,
 	.sdtim4		= 0x543F0ADFul,
-	.zqcfg		= 0xF0073200ul,
+	.zqcfg		= 0x70073200ul,
 	.sdrfc		= 0x00001457ul,
 };
 
@@ -144,10 +145,10 @@ static struct ddr3_phy_config ddr3phy_1333_32 = {
 	.ptr2		= 0, /* not set in gel */
 	.ptr3		= 0x0B4515C2ul,
 	.ptr4		= 0x0A6E08B4ul,
-	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK | UDIMM_MASK),
-	.dcr_val	= ((1 << 10) | (1 << 27) | (1 << 29)),
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
+	.dcr_val	= ((1 << 10)),
 	.dtpr0		= 0x8558AA55ul,
-	.dtpr1		= 0x12857280ul,
+	.dtpr1		= 0x32857280ul,
 	.dtpr2		= 0x5002C200ul,
 	.mr0		= 0x00001A60ul,
 	.mr1		= 0x00000006ul,
@@ -167,7 +168,7 @@ static struct ddr3_emif_config ddr3_1333_32 = {
 	.sdtim2		= 0x00001D29ul,
 	.sdtim3		= 0x32CDFF43ul,
 	.sdtim4		= 0x543F0ADFul,
-	.zqcfg		= 0xf0073200ul,
+	.zqcfg		= 0x70073200ul,
 	.sdrfc		= 0x00001457ul,
 };
 
@@ -181,10 +182,10 @@ static struct ddr3_phy_config ddr3phy_1333_64 = {
 	.ptr2		= 0, /* not set in gel */
 	.ptr3		= 0x0B4515C2ul,
 	.ptr4		= 0x0A6E08B4ul,
-	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK | NOSRA_MASK),
-	.dcr_val	= ((1 << 10) | (1 << 27)),
+	.dcr_mask	= (PDQ_MASK | MPRDQ_MASK | BYTEMASK_MASK),
+	.dcr_val	= ((1 << 10)),
 	.dtpr0		= 0x8558AA55ul,
-	.dtpr1		= 0x12857280ul,
+	.dtpr1		= 0x32857280ul,
 	.dtpr2		= 0x5002C200ul,
 	.mr0		= 0x00001A60ul,
 	.mr1		= 0x00000006ul,
@@ -255,6 +256,100 @@ void init_ddremif(u32 base, struct ddr3_emif_config *emif_cfg)
 	__raw_writel(emif_cfg->sdrfc,  base + TCI6638_DDR3_SDRFC_OFFSET );
 }
 
+/*********** Begin DDR Reset Workaround ***********/
+void ddr_reset_workaround(void)
+{
+
+	unsigned int tmp, tmp_a, tmp_b;
+
+	/*
+	 * Check for PGSR0 error bits of DDR3 PHY.
+	 * Check for WLERR, QSGERR, WLAERR,
+	 * RDERR, WDERR, REERR, WEERR error to see if they are set or not
+	 */
+	tmp_a = __raw_readl(TCI6638_DDR3A_DDRPHYC +
+				TCI6638_DDRPHY_PGSR0_OFFSET);
+	tmp_b = __raw_readl(TCI6638_DDR3B_DDRPHYC +
+				TCI6638_DDRPHY_PGSR0_OFFSET);
+
+	if (((tmp_a & 0x0FE00000) != 0) || ((tmp_b & 0x0FE00000) != 0)) {
+
+		printf("DDR Leveling Error Detected!\n");
+		printf("DDR3A PGSR0 = 0x%x\n", tmp_a);
+		printf("DDR3B PGSR0 = 0x%x\n", tmp_b);
+
+		/*
+		 * Write Keys to KICK registers to enable writes to registers
+		 * in boot config space
+		 */
+		__raw_writel(KEYSTONE_KICK0_MAGIC, KEYSTONE_KICK0);
+		__raw_writel(KEYSTONE_KICK1_MAGIC, KEYSTONE_KICK1);
+
+		/*
+		 * Move DDR3A Module out of reset isolation by setting
+		 * MDCTL23[12] = 0
+		 */
+		tmp_a = __raw_readl(TCI6638_PSC_BASE + 0xA5C);
+		tmp_a &= ~(0x1000);
+		__raw_writel(tmp_a, TCI6638_PSC_BASE + 0xA5C);
+
+		/*
+		 * Move DDR3B Module out of reset isolation by setting
+		 * MDCTL24[12] = 0
+		 */
+		 tmp_b = __raw_readl(TCI6638_PSC_BASE + 0xA60);
+		 tmp_b &= ~(0x1000);
+		__raw_writel(tmp_b, TCI6638_PSC_BASE + 0xA60);
+
+		/*
+		 * Write 0x5A69 Key to RSTCTRL[15:0] to unlock writes
+		 * to RSTCTRL and RSTCFG
+		 */
+		tmp = __raw_readl(TCI6638_PLL_CNTRL_BASE +
+					MAIN_PLL_CTRL_RSTCTRL);
+		tmp &= ~(0xFFFF);
+		tmp |= 0x5A69;
+		__raw_writel(tmp, TCI6638_PLL_CNTRL_BASE +
+					MAIN_PLL_CTRL_RSTCTRL);
+
+		/*
+		 * Set PLL Controller to drive hard reset on SW trigger by
+		 * setting RSTCFG[13] = 0
+		 */
+		tmp = __raw_readl(TCI6638_PLL_CNTRL_BASE +
+					MAIN_PLL_CTRL_RSTCFG);
+		tmp &= ~(0x2000);
+		tmp |= 0x0000;
+		__raw_writel(tmp, TCI6638_PLL_CNTRL_BASE +
+					MAIN_PLL_CTRL_RSTCFG);
+
+		/*
+		 * Write 0x5A69 Key to RSTCTRL[15:0] to unlock writes to
+		 * RSTCTRL and RSTCFG
+		 */
+		tmp = __raw_readl(TCI6638_PLL_CNTRL_BASE +
+					MAIN_PLL_CTRL_RSTCTRL);
+		tmp &= ~(0xFFFF);
+		tmp |= 0x5A69;
+		__raw_writel(tmp, TCI6638_PLL_CNTRL_BASE +
+					MAIN_PLL_CTRL_RSTCTRL);
+
+		/*
+		 * Write RSTCTRL[16] = 0 to initiate software reset via PLL
+		 * controller
+		 */
+		tmp = __raw_readl(TCI6638_PLL_CNTRL_BASE +
+					MAIN_PLL_CTRL_RSTCTRL);
+		tmp &= ~(0x10000);
+		tmp = 0x00000;
+		__raw_writel(tmp, TCI6638_PLL_CNTRL_BASE +
+					MAIN_PLL_CTRL_RSTCTRL);
+
+		/* Wait for Reset */
+		for(;;);
+	}
+}
+
 int get_dimm_params(char *dimm_name)
 {
 	u8 spd_params[256];
@@ -315,12 +410,19 @@ void init_ddr3( void ) {
 
 	char dimm_name[32];
 
+	if(~(__raw_readl(TCI6638_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1)) {
+		if (cpu_revision() > 0)
+			init_pll(&ddr3a_400);
+		else
+			init_pll(&ddr3a_333);
+		init_pll(&ddr3b_333);
+	}
+
 	get_dimm_params(dimm_name);
 
 	printf("Detected SO-DIMM [%s]\n", dimm_name);
 
 	if (!strcmp(dimm_name, "18KSF1G72HZ-1G6E2 ")) {
-		init_pll(&ddr3a_400);
 		if (cpu_revision() > 0) {
 			init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1600_64A);
 			init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_64);
@@ -331,7 +433,6 @@ void init_ddr3( void ) {
 		}
 	}
 	else {
-		init_pll(&ddr3a_333);
 		if (cpu_revision() > 0) {
 			init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1333_64A);
 			init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_64);
@@ -342,8 +443,11 @@ void init_ddr3( void ) {
 		}
 	}
 
-	init_pll(&ddr3b_333);
 	init_ddrphy(TCI6638_DDR3B_DDRPHYC, &ddr3phy_1333_64);
 	init_ddremif(TCI6638_DDR3B_EMIF_CTRL_BASE, &ddr3_1333_64);
+
+	/* Apply the workaround for PG 1.0 and 1.1 Silicons */
+	if (cpu_revision() <= 1)
+		ddr_reset_workaround();
 }
 

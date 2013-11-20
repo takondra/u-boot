@@ -104,5 +104,9 @@ static struct pllctl_regs *pllctl_regs[] = {
 
 #define PLLDIV_ENABLE		BIT(15)
 
+/* PLL Reset Registers */
+#define MAIN_PLL_CTRL_RSTYPE	0xe4
+#define MAIN_PLL_CTRL_RSTCTRL	0xe8
+#define MAIN_PLL_CTRL_RSTCFG	0xec
 
 #endif  /* _CLOCK_DEFS_H_ */
