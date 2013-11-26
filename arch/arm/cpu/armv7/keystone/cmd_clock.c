@@ -54,9 +54,7 @@ int do_pll_cmd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	if (argc != 5)
 		goto pll_cmd_usage;
 
-	if (strncmp(argv[1], "main", 4) == 0)
-		cmd_pll_data.pll = MAIN_PLL;
-	else if (strncmp(argv[1], "pa", 2) == 0)
+	if (strncmp(argv[1], "pa", 2) == 0)
 		cmd_pll_data.pll = PASS_PLL;
 #ifdef CONFIG_SOC_TCI6638
 	else if (strncmp(argv[1], "arm", 3) == 0)
@@ -92,14 +90,14 @@ pll_cmd_usage:
 U_BOOT_CMD(
 	pllset,	5,	0,	do_pll_cmd,
 	"set pll multiplier and pre divider",
-	"<main|pa|arm|ddr3a|ddr3b> <mult> <div> <OD>\n"
+	"<pa|arm|ddr3a|ddr3b> <mult> <div> <OD>\n"
 );
 #endif
 #ifdef CONFIG_SOC_TCI6614
 U_BOOT_CMD(
 	pllset,	5,	0,	do_pll_cmd,
 	"set pll multiplier and pre divider",
-	"<main|pa|ddr3> <mult> <div> <OD>\n"
+	"<pa|ddr3> <mult> <div> <OD>\n"
 );
 #endif
 
