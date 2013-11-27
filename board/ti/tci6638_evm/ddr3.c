@@ -423,16 +423,20 @@ void init_ddr3( void ) {
 	printf("Detected SO-DIMM [%s]\n", dimm_name);
 
 	if (!strcmp(dimm_name, "18KSF1G72HZ-1G6E2 ")) {
+		/* 8G SO-DIMM */
 		if (cpu_revision() > 0) {
 			init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1600_64A);
 			init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_64);
+			printf("DRAM:  Capacity 8 GiB (includes reported below)\n");
 		}
 		else {
 			init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1600_32);
 			init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1600_32);
+			printf("DRAM:  Capacity 4 GiB (includes reported below)\n");
 		}
 	}
 	else {
+		/* 2G SO-DIMM */
 		if (cpu_revision() > 0) {
 			init_ddrphy(TCI6638_DDR3A_DDRPHYC, &ddr3phy_1333_64A);
 			init_ddremif(TCI6638_DDR3A_EMIF_CTRL_BASE, &ddr3_1333_64);
