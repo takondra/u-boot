@@ -361,7 +361,7 @@ int get_dimm_params(char *dimm_name)
 	old_bus = i2c_get_bus_num();
 	i2c_set_bus_num(1);
 
-	ret = i2c_read(0x53, 0, 0, spd_params, 256);
+	ret = i2c_read(0x53, 0, 1, spd_params, 256);
 
 	i2c_set_bus_num(old_bus);
 
