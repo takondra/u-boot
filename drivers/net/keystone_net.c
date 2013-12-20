@@ -684,6 +684,7 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 		return (-1);
 	}
 	if (netcp_init(&net_rx_buffs)) {
+		qm_close();
 		printf("ERROR: netcp_init()\n");
 		return (-1);
 	}
@@ -705,8 +706,11 @@ static int tci6614_eth_open(struct eth_device *dev, bd_t *bis)
 		udelay(1000);
 		if (!loopback_test) {
 			link = keystone_get_link_status(dev);
-			if (link == 0)
+			if (link == 0) {
+				netcp_close();
+				qm_close();
 				return -1;
+			}
 		}
 	}
 
