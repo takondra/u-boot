@@ -114,6 +114,20 @@ eth_priv_t eth_priv_cfg[] = {
 		.slave_port	= 2,
 		.sgmii_link_type = SGMII_LINK_MAC_PHY,
 	},
+	{
+		.int_name	= "K2HK_EMAC2",
+		.rx_flow	= 24,
+		.phy_addr	= 2,
+		.slave_port	= 3,
+		.sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED,
+	},
+	{
+		.int_name	= "K2HK_EMAC3",
+		.rx_flow	= 25,
+		.phy_addr	= 3,
+		.slave_port	= 4,
+		.sgmii_link_type = SGMII_LINK_MAC_MAC_FORCED,
+	},
 };
 
 inline int get_num_eth_ports(void)
