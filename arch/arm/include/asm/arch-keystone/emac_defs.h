@@ -359,7 +359,7 @@ typedef struct  {
     dv_reg		TX_PAUSE;
     dv_reg		EMCONTROL;
     dv_reg		PRI_MAP;
-
+    u32			rsvd1[6];
 } emac_regs;
 
 typedef struct
