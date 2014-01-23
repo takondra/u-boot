@@ -149,7 +149,7 @@ struct mac_sl_cfg {
 #define CPSW_CTL_VLAN_AWARE             (1 << 1)
 #define CPSW_CTL_FIFO_LOOPBACK          (1 << 0)
 
-#define DEVICE_CPSW_NUM_PORTS       3                    /* 3 switch ports */
+#define DEVICE_CPSW_NUM_PORTS       5                    /* 5 switch ports */
 #define DEVICE_CPSW_BASE            (0x02090800)
 #define targetGetSwitchCtl()        CPSW_CTL_P0_ENABLE   /* Enable port 0 */
 #define targetGetSwitchMaxPktSize() 9000
