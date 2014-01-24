@@ -260,7 +260,7 @@ struct pa_config {
 #define TARGET_SERDES_LOCK_DELAY        (1600*1000)
 
 #define DEVICE_EMACSL_BASE(x)           (TCI66XX_PASS_BASE + 0x00090900 + (x)*0x040)
-#define DEVICE_N_GMACSL_PORTS           2
+#define DEVICE_N_GMACSL_PORTS           4
 #define DEVICE_EMACSL_RESET_POLL_COUNT  100
 
 #define DEVICE_PSTREAM_CFG_REG_ADDR                 (TCI66XX_PASS_BASE + 0x604)
