@@ -319,7 +319,6 @@ void ddr_reset_workaround(void)
 		tmp = __raw_readl(TCI6638_PLL_CNTRL_BASE +
 					MAIN_PLL_CTRL_RSTCFG);
 		tmp &= ~(0x2000);
-		tmp |= 0x0000;
 		__raw_writel(tmp, TCI6638_PLL_CNTRL_BASE +
 					MAIN_PLL_CTRL_RSTCFG);
 
@@ -341,7 +340,6 @@ void ddr_reset_workaround(void)
 		tmp = __raw_readl(TCI6638_PLL_CNTRL_BASE +
 					MAIN_PLL_CTRL_RSTCTRL);
 		tmp &= ~(0x10000);
-		tmp = 0x00000;
 		__raw_writel(tmp, TCI6638_PLL_CNTRL_BASE +
 					MAIN_PLL_CTRL_RSTCTRL);
 
@@ -410,13 +408,14 @@ void init_ddr3( void ) {
 
 	char dimm_name[32];
 
-	if(~(__raw_readl(TCI6638_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1)) {
+	if (__raw_readl(TCI6638_PLL_CNTRL_BASE + MAIN_PLL_CTRL_RSTYPE) & 0x1) {
 		if (cpu_revision() > 0)
 			init_pll(&ddr3a_400);
 		else
 			init_pll(&ddr3a_333);
 		init_pll(&ddr3b_333);
-	}
+	} else
+		printf("Power-on reset was not the last reset to occur !\n");
 
 	get_dimm_params(dimm_name);
 
