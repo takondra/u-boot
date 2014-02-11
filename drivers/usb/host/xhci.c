@@ -796,6 +796,9 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 			break;
 		case USB_PORT_FEAT_POWER:
 			reg |= PORT_POWER;
+#ifdef CONFIG_USB_XHCI_KEYSTONE
+			mdelay(2500);
+#endif
 			xhci_writel(status_reg, reg);
 			break;
 		case USB_PORT_FEAT_RESET:
