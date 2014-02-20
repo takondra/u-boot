@@ -91,6 +91,7 @@
 #define USB_DT_REPORT       (USB_TYPE_CLASS | 0x02)
 #define USB_DT_PHYSICAL     (USB_TYPE_CLASS | 0x03)
 #define USB_DT_HUB          (USB_TYPE_CLASS | 0x09)
+#define USB_DT_SS_HUB       (USB_TYPE_CLASS | 0x0a)
 
 /* Descriptor sizes per descriptor type */
 #define USB_DT_DEVICE_SIZE      18
@@ -199,6 +200,13 @@
 #define USB_RT_PORT	(USB_TYPE_CLASS | USB_RECIP_OTHER)
 
 /*
+ * Hub class additional requests defined by USB 3.0 spec
+ * See USB 3.0 spec Table 10-6
+ */
+#define HUB_SET_DEPTH		12
+#define HUB_GET_PORT_ERR_COUNT	13
+
+/*
  * Hub Class feature numbers
  */
 #define C_HUB_LOCAL_POWER   0
@@ -226,6 +234,7 @@
  * Changes to Port feature numbers for Super speed,
  * from USB 3.0 spec Table 10-8
  */
+#define USB_SS_PORT_FEAT_LINK_STATE	5
 #define USB_SS_PORT_FEAT_U1_TIMEOUT	23
 #define USB_SS_PORT_FEAT_U2_TIMEOUT	24
 #define USB_SS_PORT_FEAT_C_LINK_STATE	25
@@ -283,5 +292,16 @@
 
 #define HUB_CHANGE_LOCAL_POWER	0x0001
 #define HUB_CHANGE_OVERCURRENT	0x0002
+
+/*
+ * Hub Device descriptor
+ * USB Hub class device protocols
+ */
+
+#define USB_HUB_PR_FS		0 /* Full speed hub */
+#define USB_HUB_PR_HS_NO_TT	0 /* Hi-speed hub without TT */
+#define USB_HUB_PR_HS_SINGLE_TT	1 /* Hi-speed hub with single TT */
+#define USB_HUB_PR_HS_MULTI_TT	2 /* Hi-speed hub with multiple TT */
+#define USB_HUB_PR_SS		3 /* Super speed hub */
 
 #endif /*_USB_DEFS_H_ */

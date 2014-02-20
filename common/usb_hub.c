@@ -58,12 +58,29 @@
 static struct usb_hub_device hub_dev[USB_MAX_HUB];
 static int usb_hub_index;
 
+static inline int hub_is_superspeed(struct usb_device *dev)
+{
+	return (dev->descriptor.bDeviceProtocol == USB_HUB_PR_SS);
+}
+
+static inline int is_root_hub(struct usb_device *dev)
+{
+	return (dev->parent == NULL);
+}
 
 static int usb_get_hub_descriptor(struct usb_device *dev, void *data, int size)
 {
+	unsigned dtype;
+
+	if (!is_root_hub(dev) && (hub_is_superspeed(dev)))
+		dtype = USB_DT_SS_HUB;
+	else
+		/* root hub or other non-SS device */
+		dtype = USB_DT_HUB;
+
 	return usb_control_msg(dev, usb_rcvctrlpipe(dev, 0),
 		USB_REQ_GET_DESCRIPTOR, USB_DIR_IN | USB_RT_HUB,
-		USB_DT_HUB << 8, 0, data, size, USB_CNTL_TIMEOUT);
+		dtype << 8, 0, data, size, USB_CNTL_TIMEOUT);
 }
 
 static int usb_clear_port_feature(struct usb_device *dev, int port, int feature)
@@ -168,10 +185,12 @@ static struct usb_hub_device *usb_hub_allocate(void)
 
 #define MAX_TRIES 5
 
-static inline char *portspeed(int portstatus)
+static inline char *portspeed(struct usb_device *hub_dev, int portstatus)
 {
 	char *speed_str;
 
+	if (!is_root_hub(hub_dev) && hub_is_superspeed(hub_dev))
+		return "5 Gb/s";
 	switch (portstatus & USB_PORT_STAT_SPEED_MASK) {
 	case USB_PORT_STAT_SUPER_SPEED:
 		speed_str = "5 Gb/s";
@@ -212,7 +231,7 @@ int hub_port_reset(struct usb_device *dev, int port,
 		portchange = le16_to_cpu(portsts->wPortChange);
 
 		debug("portstatus %x, change %x, %s\n", portstatus, portchange,
-							portspeed(portstatus));
+						portspeed(dev, portstatus));
 
 		debug("STAT_C_CONNECTION = %d STAT_CONNECTION = %d" \
 		      "  USB_PORT_STAT_ENABLE %d\n",
@@ -256,10 +275,11 @@ void usb_hub_port_connect_change(struct usb_device *dev, int port)
 	}
 
 	portstatus = le16_to_cpu(portsts->wPortStatus);
+
 	debug("portstatus %x, change %x, %s\n",
 	      portstatus,
 	      le16_to_cpu(portsts->wPortChange),
-	      portspeed(portstatus));
+	      portspeed(dev, portstatus));
 
 	/* Clear the connection change status */
 	usb_clear_port_feature(dev, port + 1, USB_PORT_FEAT_C_CONNECTION);
@@ -285,24 +305,29 @@ void usb_hub_port_connect_change(struct usb_device *dev, int port)
 	/* Allocate a new device struct for it */
 	usb = usb_alloc_new_device(dev->controller);
 
-	switch (portstatus & USB_PORT_STAT_SPEED_MASK) {
-	case USB_PORT_STAT_SUPER_SPEED:
+	if (!is_root_hub(dev) && hub_is_superspeed(dev))
 		usb->speed = USB_SPEED_SUPER;
-		break;
-	case USB_PORT_STAT_HIGH_SPEED:
-		usb->speed = USB_SPEED_HIGH;
-		break;
-	case USB_PORT_STAT_LOW_SPEED:
-		usb->speed = USB_SPEED_LOW;
-		break;
-	default:
-		usb->speed = USB_SPEED_FULL;
-		break;
+	else {
+		switch (portstatus & USB_PORT_STAT_SPEED_MASK) {
+		case USB_PORT_STAT_SUPER_SPEED:
+			usb->speed = USB_SPEED_SUPER;
+			break;
+		case USB_PORT_STAT_HIGH_SPEED:
+			usb->speed = USB_SPEED_HIGH;
+			break;
+		case USB_PORT_STAT_LOW_SPEED:
+			usb->speed = USB_SPEED_LOW;
+			break;
+		default:
+			usb->speed = USB_SPEED_FULL;
+			break;
+		}
 	}
 
 	dev->children[port] = usb;
 	usb->parent = dev;
 	usb->portnr = port + 1;
+	usb->level = dev->level + 1;
 	/* Run it through the hoops (find a driver, etc) */
 	if (usb_new_device(usb)) {
 		/* Woops, disable the port */
@@ -319,7 +344,7 @@ static int usb_hub_configure(struct usb_device *dev)
 	int i;
 	ALLOC_CACHE_ALIGN_BUFFER(unsigned char, buffer, USB_BUFSIZ);
 	unsigned char *bitmap;
-	short hubCharacteristics;
+	short hubCharacteristics, hubDeviceRemovable;
 	struct usb_hub_descriptor *descriptor;
 	struct usb_hub_device *hub;
 	__maybe_unused struct usb_hub_status *hubsts;
@@ -350,28 +375,40 @@ static int usb_hub_configure(struct usb_device *dev)
 		      "descriptor 2nd giving up %lX\n", dev->status);
 		return -1;
 	}
+
 	memcpy((unsigned char *)&hub->desc, buffer, descriptor->bLength);
 	/* adjust 16bit values */
 	put_unaligned(le16_to_cpu(get_unaligned(
 			&descriptor->wHubCharacteristics)),
 			&hub->desc.wHubCharacteristics);
-	/* set the bitmap */
-	bitmap = (unsigned char *)&hub->desc.DeviceRemovable[0];
-	/* devices not removable by default */
-	memset(bitmap, 0xff, (USB_MAXCHILDREN+1+7)/8);
-	bitmap = (unsigned char *)&hub->desc.PortPowerCtrlMask[0];
-	memset(bitmap, 0xff, (USB_MAXCHILDREN+1+7)/8); /* PowerMask = 1B */
 
-	for (i = 0; i < ((hub->desc.bNbrPorts + 1 + 7)/8); i++)
-		hub->desc.DeviceRemovable[i] = descriptor->DeviceRemovable[i];
+	hubCharacteristics = get_unaligned(&hub->desc.wHubCharacteristics);
 
-	for (i = 0; i < ((hub->desc.bNbrPorts + 1 + 7)/8); i++)
-		hub->desc.PortPowerCtrlMask[i] = descriptor->PortPowerCtrlMask[i];
+	if (!(hub_is_superspeed(dev))) {
+		/* set the bitmap */
+		bitmap = (unsigned char *)&hub->desc.u.hs.DeviceRemovable[0];
+		/* devices not removable by default */
+		memset(bitmap, 0xff, (USB_MAXCHILDREN+1+7)/8);
+		bitmap = (unsigned char *)&hub->desc.u.hs.PortPowerCtrlMask[0];
+		/* PowerMask = 1B */
+		memset(bitmap, 0xff, (USB_MAXCHILDREN+1+7)/8);
+
+		for (i = 0; i < ((hub->desc.bNbrPorts + 1 + 7)/8); i++)
+			hub->desc.u.hs.DeviceRemovable[i] =
+				descriptor->u.hs.DeviceRemovable[i];
+
+		for (i = 0; i < ((hub->desc.bNbrPorts + 1 + 7)/8); i++)
+			hub->desc.u.hs.PortPowerCtrlMask[i] =
+				descriptor->u.hs.PortPowerCtrlMask[i];
+	} else
+		/* adjust 16bit values */
+		put_unaligned(le16_to_cpu(get_unaligned(
+				&descriptor->u.ss.DeviceRemovable)),
+				&hub->desc.u.ss.DeviceRemovable);
 
 	dev->maxchild = descriptor->bNbrPorts;
 	debug("%d ports detected\n", dev->maxchild);
 
-	hubCharacteristics = get_unaligned(&hub->desc.wHubCharacteristics);
 	switch (hubCharacteristics & HUB_CHAR_LPSM) {
 	case 0x00:
 		debug("ganged power switching\n");
@@ -408,10 +445,19 @@ static int usb_hub_configure(struct usb_device *dev)
 	debug("hub controller current requirement: %dmA\n",
 	      descriptor->bHubContrCurrent);
 
-	for (i = 0; i < dev->maxchild; i++)
-		debug("port %d is%s removable\n", i + 1,
-		      hub->desc.DeviceRemovable[(i + 1) / 8] & \
-		      (1 << ((i + 1) % 8)) ? " not" : "");
+	if (!(hub_is_superspeed(dev))) {
+		for (i = 0; i < dev->maxchild; i++)
+			debug("port %d is%s removable\n", i + 1,
+			      hub->desc.u.hs.DeviceRemovable[(i + 1) / 8] & \
+			      (1 << ((i + 1) % 8)) ? " not" : "");
+	} else {
+		hubDeviceRemovable =
+			get_unaligned(&hub->desc.u.ss.DeviceRemovable);
+
+		for (i = 0; i < dev->maxchild; i++)
+			debug("port %d is%s removable\n", i + 1,
+			      hubDeviceRemovable & (1 << i) ? " not" : "");
+	}
 
 	if (sizeof(struct usb_hub_status) > USB_BUFSIZ) {
 		debug("usb_hub_configure: failed to get Status - " \
@@ -438,6 +484,13 @@ static int usb_hub_configure(struct usb_device *dev)
 	debug("%sover-current condition exists\n",
 	      (le16_to_cpu(hubsts->wHubStatus) & HUB_STATUS_OVERCURRENT) ? \
 	      "" : "no ");
+
+	if (!is_root_hub(dev) && hub_is_superspeed(dev))
+		usb_control_msg(dev, usb_sndctrlpipe(dev, 0),
+				HUB_SET_DEPTH, USB_RT_HUB,
+				0, 0, NULL, 0,
+				USB_CNTL_TIMEOUT);
+
 	usb_hub_power_on(hub);
 
 	for (i = 0; i < dev->maxchild; i++) {

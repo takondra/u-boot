@@ -60,8 +60,7 @@ static struct descriptor {
 		cpu_to_le16(0x8), /* wHubCharacteristics */
 		10,		/* bPwrOn2PwrGood */
 		0,		/* bHubCntrCurrent */
-		{},		/* Device removable */
-		{}		/* at most 7 ports! XXX */
+		{}		/* Device removable */
 	},
 	{
 		0x12,		/* bLength */
@@ -796,10 +795,10 @@ static int xhci_submit_root(struct usb_device *udev, unsigned long pipe,
 			break;
 		case USB_PORT_FEAT_POWER:
 			reg |= PORT_POWER;
-#ifdef CONFIG_USB_XHCI_KEYSTONE
-			mdelay(2500);
-#endif
 			xhci_writel(status_reg, reg);
+#ifdef CONFIG_USB_XHCI_KEYSTONE
+			mdelay(3000);
+#endif
 			break;
 		case USB_PORT_FEAT_RESET:
 			reg |= PORT_RESET;

@@ -929,13 +929,21 @@ int usb_new_device(struct usb_device *dev)
 			return 1;
 		}
 
+		if (port < 14)
+			dev->route = parent->route +
+				((port + 1) << ((parent->level - 1) * 4));
+		else
+			dev->route = parent->route +
+				(15 << ((parent->level - 1) * 4));
+
 		/* reset the port for the second time */
 		err = hub_port_reset(dev->parent, port, &portstatus);
 		if (err < 0) {
 			printf("\n     Couldn't reset port %i\n", port);
 			return 1;
 		}
-	}
+	} else
+		dev->route = 0;
 #endif
 
 	dev->epmaxpacketin[0] = dev->descriptor.bMaxPacketSize0;

@@ -102,6 +102,7 @@ enum {
 
 struct usb_device {
 	int	devnum;			/* Device number on USB bus */
+	u32	route;			/* tree topology hex str for xHCI */
 	int	speed;			/* full/low/high */
 	char	mf[32];			/* manufacturer */
 	char	prod[32];		/* product */
@@ -138,6 +139,7 @@ struct usb_device {
 	int act_len;			/* transfered bytes */
 	int maxchild;			/* Number of ports if hub */
 	int portnr;
+	u32 level;			/* Number of USB hub ancestors */
 	struct usb_device *parent;
 	struct usb_device *children[USB_MAXCHILDREN];
 
@@ -384,10 +386,21 @@ struct usb_hub_descriptor {
 	unsigned short wHubCharacteristics;
 	unsigned char  bPwrOn2PwrGood;
 	unsigned char  bHubContrCurrent;
-	unsigned char  DeviceRemovable[(USB_MAXCHILDREN+1+7)/8];
-	unsigned char  PortPowerCtrlMask[(USB_MAXCHILDREN+1+7)/8];
-	/* DeviceRemovable and PortPwrCtrlMask want to be variable-length
-	   bitmaps that hold max 255 entries. (bit0 is ignored) */
+
+	/* 2.0 and 3.0 hubs differ here */
+	union {
+		struct {
+			/* add 1 bit for hub status change; round to bytes */
+			unsigned char DeviceRemovable[(USB_MAXCHILDREN + 1 + 7) / 8];
+			unsigned char PortPowerCtrlMask[(USB_MAXCHILDREN + 1 + 7) / 8];
+		}  __attribute__ ((packed)) hs;
+
+		struct {
+			unsigned char bHubHdrDecLat;
+			unsigned short wHubDelay;
+			unsigned short DeviceRemovable;
+		}  __attribute__ ((packed)) ss;
+	} u;
 } __attribute__ ((packed));
 
 

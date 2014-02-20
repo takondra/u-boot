@@ -657,7 +657,7 @@ void xhci_setup_addressable_virt_dev(struct usb_device *udev)
 	slot_ctx = xhci_get_slot_ctx(ctrl, virt_dev->in_ctx);
 
 	/* Only the control endpoint is valid - one endpoint context */
-	slot_ctx->dev_info |= cpu_to_le32(LAST_CTX(1) | 0);
+	slot_ctx->dev_info |= cpu_to_le32(LAST_CTX(1) | udev->route);
 
 	switch (udev->speed) {
 	case USB_SPEED_SUPER:
