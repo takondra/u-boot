@@ -296,7 +296,7 @@ void usb_hub_port_connect_change(struct usb_device *dev, int port)
 
 	/* Reset the port */
 	if (hub_port_reset(dev, port, &portstatus) < 0) {
-		printf("cannot reset port %i!?\n", port + 1);
+		debug("cannot reset port %i!?\n", port + 1);
 		return;
 	}
 
