@@ -221,6 +221,7 @@
 	"addr_uboot=0x87000000\0"					\
 	"addr_fs=0x82000000\0"						\
 	"addr_ubi=0x82000000\0"						\
+	"addr_secdb_key=0xc000000\0"					\
 	"fdt_high=0xffffffff\0"						\
 	"initrd_high=0xffffffff\0"					\
 	"name_fdt=uImage-k2hk-evm.dtb\0"				\
@@ -235,7 +236,8 @@
 	"run_kern=bootm ${addr_kern} ${addr_uinitrd} ${addr_fdt}\0"	\
 	"init_net=run set_fs_none args_all args_net\0"			\
 	"init_ubi=run set_fs_none args_all args_ubi; "			\
-		"ubi part ubifs; ubifsmount boot\0"			\
+		"ubi part ubifs; ubifsmount boot;"			\
+		"ubifsload ${addr_secdb_key} securedb.key.bin;\0"	\
 	"get_fdt_net=dhcp ${addr_fdt} ${tftp_root}/${name_fdt}\0"	\
 	"get_fdt_ubi=ubifsload ${addr_fdt} ${name_fdt}\0"		\
 	"get_kern_net=dhcp ${addr_kern} ${tftp_root}/${name_kern}\0"	\
