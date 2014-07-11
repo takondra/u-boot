@@ -171,6 +171,17 @@
 #define CONFIG_EFI_PARTITION
 #define CONFIG_FS_FAT
 
+/* USB ethernet config */
+#define CONFIG_USB_HOST_ETHER	/* Enable USB Ethernet adapters */
+#define CONFIG_USB_ETHER_ASIX	/* Asix, or whatever driver(s) you want */
+
+#define CONFIG_CMD_NET
+
+#define CONFIG_BOOTP_SUBNETMASK
+#define CONFIG_BOOTP_GATEWAY
+#define CONFIG_BOOTP_HOSTNAME
+#define CONFIG_BOOTP_BOOTPATH
+
 /* U-Boot command configuration */
 #include <config_cmd_default.h>
 #undef CONFIG_CMD_BDI
